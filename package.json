@@ -1,0 +1,15 @@
+{
+  "name": "@metric-im/wiki-server",
+  "version": "1.0.0",
+  "description": "simple markdown wiki",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Sprague",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-plantuml": "^0.9.0"
+  }
+}
