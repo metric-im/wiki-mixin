@@ -1,27 +1,53 @@
 let fs = require('fs');
+const plantuml = require("node-plantuml");
+const Identifier = require("@metric-im/identifier");
 
 class Wiki {
     constructor(connector) {
         this.connector = connector;
+        this.collection = this.connector.db.collection('wiki');
+        this.rootDoc = "WikiHome";
     }
     routes() {
-        let router = require('express').Router();
-        router.all("/wiki/:docid",async(req,res)=>{
+        const plantuml = require('node-plantuml');
+        const router = require('express').Router();
+        router.all("/wiki/:docId?",async(req,res)=>{
             try {
-                let result = await this[req.method](req.params.docid,req.query);
-                res.set("Content-Type","text/plain");
-                res.send(result);
+                console.log(req.method);
+                let result = await this[req.method.toLowerCase()](req.params.docId,req.query,req.body);
+                res.json(result);
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
                 res.status(500).send(`Error invoking ${req.method} on data: ${e.message}`);
             }
         });
+        router.get('/uml/',async(req,res)=>{
+            try {
+                res.set('Content-Type', 'image/png');
+                let gen = plantuml.generate(decodeURIComponent(req.query.txt),{format: 'png'});
+                gen.out.pipe(res);
+            } catch(e) {
+                res.status(e.status||500).json({status:"error",message:e.message});
+            }
+        });
         return router;
     }
-    async GET(docid,options={}) {
-        let doc = fs.readFileSync(__dirname+'./docs/'+docid+".md");
-        if (doc) return doc.toString();
-        else return null;
+    async get(docId,options={}) {
+        try {
+            if (!docId) docId = this.rootDoc;
+            let doclet = await this.collection.findOne({_id:docId});
+            if (!doclet) doclet = {_id:docId,title:docId,body:`# ${docId}\n`};
+            return doclet;
+        } catch(e) {
+            return '# '+docId;
+        }
+    }
+    async put(docId,options={},body={}) {
+        if (!body._id) body._id = docId?docId:Identifier.new;
+        if (!body.created) body.create = new Date();
+        body.modified = new Date();
+        let doclet = await this.collection.findOneAndUpdate({_id:docId},{$set:body},{upsert:true,returnNewDocument:true});
+        return doclet;
     }
 }
 
