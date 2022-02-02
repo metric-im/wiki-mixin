@@ -41,6 +41,7 @@ class API {
         }
     }
     static async test() {
+        //TODO: broken
         let response = await fetch(API.base+'/session/test', {credentials:'include'});
         return (response.ok);
     }
