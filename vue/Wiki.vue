@@ -6,10 +6,12 @@
     <button :class="{active: editing}" @click="doneEditing"><span class="icon icon-check"/></button>
     <button :class="{active: editing}" @click="cancelEditing"><span class="icon icon-cross"/></button>
   </div>
-  <div class="doclet-container">
-    <div :class="['doclet-render',{active:!editing}]" v-html="render"></div>
-    <div :class="['doclet-edit',{active:editing}]">
-      <textarea class="editor" v-model="editText"></textarea>
+  <div class="doclet-tray">
+    <div class="doclet-container">
+      <div :class="['doclet-render',{active:!editing}]" v-html="render"></div>
+      <div :class="['doclet-edit',{active:editing}]">
+        <textarea class="editor" v-model="editText"></textarea>
+      </div>
     </div>
   </div>
 </template>
@@ -18,6 +20,7 @@
 // import remarkGfm from 'remark-gfm' // support tables and such
 import {marked} from 'marked';
 import API from "../utilities/API";
+import WikiWord from "../utilities/WikiWord";
 export default {
   data() {
     return {
@@ -25,12 +28,14 @@ export default {
       doclet: {},
       render:"",
       editText:"",
-      editing:false
+      editing:false,
+      path:'/site/docs'
     }
   },
   async mounted() {
     this.docId = this.$route.params.id
     this.doclet = await API.get('/wiki'+(this.docId?'/'+this.docId:""));
+    this.wikiWord = new WikiWord(this.path);
     this.prepareMarked();
     this.renderHtml()
   },
@@ -47,7 +52,8 @@ export default {
       marked.use({gfm:true,renderer:plantuml});
     },
     renderHtml() {
-      this.render = marked(this.doclet.body)+"\n<style>\n.doclet-container h1{margin-top:0}\n</style>";
+      let wordified = this.wikiWord.process(this.doclet.body);
+      this.render = marked(wordified)+"\n<style>\n.doclet-container h1{margin-top:0}\n</style>";
     },
     async save() {
       let updated = await API.put('/wiki/'+this.doclet._id,this.doclet);
@@ -79,7 +85,11 @@ TextArea h1 {
 .doclet-container {
   width:calc(100% - var(--spacer2));
   height:calc(100% - var(--spacer2));
-  margin:var(--spacer);
+  padding:var(--spacer);
+}
+.doclet-tray {
+  overflow-y:auto;
+  height:100%;
 }
 .doclet-render {
   display:none;
@@ -93,7 +103,7 @@ TextArea h1 {
 }
 .controls {
   position:absolute;
-  right: 4px;
+  right: 16px;
   display: inline-flex;
   margin-top:-12px;
 }

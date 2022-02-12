@@ -13,7 +13,6 @@ class Wiki {
         const router = require('express').Router();
         router.all("/wiki/:docId?",async(req,res)=>{
             try {
-                console.log(req.method);
                 let result = await this[req.method.toLowerCase()](req.params.docId,req.query,req.body);
                 res.json(result);
             } catch(e) {
