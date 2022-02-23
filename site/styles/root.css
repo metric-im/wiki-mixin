@@ -1,0 +1,48 @@
+.wiki {
+    overflow-y:auto;
+    height:100%;
+}
+.wiki TextArea h1 {
+    margin-top:0;
+}
+.wiki #doclet-container {
+    width:calc(100% - var(--spacer2));
+    height:calc(100% - var(--spacer2));
+    padding:var(--spacer);
+}
+.wiki #doclet-render {
+    display:none;
+}
+.wiki #doclet-editor {
+    display:none;
+    height:100%;
+    width:100%;
+}
+.wiki #doclet-controls {
+    position:absolute;
+    right: 16px;
+    display: inline-flex;
+    margin-top:-12px;
+    height:30px;
+    align-self:flex-end;
+}
+.page-controls {
+    display: flex;
+    margin-top:var(--spacer);
+    height:30px;
+    align-self:flex-end;
+}
+.wiki button {
+    display:none;
+    background-color:var(--tray-bg);
+    padding:0;
+    margin-right:4px;
+    cursor:pointer;
+    border:1px solid var(--text-color);
+    border-radius:10px;
+    width:32px;
+    height:32px;
+}
+.wiki button:hover {
+    background-color:var(--page-action);
+}

@@ -16,7 +16,7 @@
 // import remarkGfm from 'remark-gfm' // support tables and such
 import {computed} from 'vue';
 import {marked} from 'marked';
-import API from "../utilities/API";
+import API from "../components/API";
 export default {
   props: {
     text: String,

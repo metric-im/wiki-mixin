@@ -19,8 +19,8 @@
 <script>
 // import remarkGfm from 'remark-gfm' // support tables and such
 import {marked} from 'marked';
-import API from "../utilities/API";
-import WikiWord from "../utilities/WikiWord";
+import API from "../components/API";
+import WikiWord from "../components/WikiWord";
 export default {
   data() {
     return {
