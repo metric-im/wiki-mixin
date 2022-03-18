@@ -10,13 +10,39 @@
     height:calc(100% - var(--spacer2));
     padding:var(--spacer);
 }
-.wiki #doclet-render {
+.wiki #doclet-controls BUTTON {
     display:none;
 }
-.wiki #doclet-editor {
+.wiki #doclet-controls:not(.editing) BUTTON.rendering {
+    display:block;
+}
+.wiki #doclet-controls.editing BUTTON.editing {
+    display:block;
+}
+.wiki #doclet-container #render-container,.wiki #doclet-container #editor-container {
     display:none;
     height:100%;
     width:100%;
+}
+.wiki #doclet-container:not(.editing) #render-container {
+    display:flex;
+    flex-direction: row;
+}
+.wiki #doclet-container.editing #editor-container {
+    display:flex;
+    flex-direction:column;
+}
+.wiki #doclet-container #doclet-menu {
+    flex:100px 0;
+}
+.wiki #doclet-container #doclet-properties {
+    flex:60px 0;
+}
+.wiki #doclet-container #doclet-render {
+    flex:1 0;
+}
+.wiki #doclet-container #doclet-editor {
+    flex:1 0;
 }
 .wiki #doclet-controls {
     position:absolute;

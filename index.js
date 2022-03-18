@@ -61,9 +61,7 @@ class Wiki {
 function getLibraryModule(req,res) {
     let library = {
         'moment':'/node_modules/moment/moment.js',
-        'marked':'/node_modules/marked/lib/marked.esm.js',
-        // 'marked':'/node_modules/marked/marked.min.js',
-        'brace':'/node_modules/brace/',
+        'marked':'/node_modules/marked/lib/marked.esm.js'
     };
     let path = library[req.params.module];
     if (req.params.path) path += req.params.path;

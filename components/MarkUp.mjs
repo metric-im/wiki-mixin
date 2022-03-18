@@ -7,7 +7,7 @@ export default class MarkUp {
         const plantuml = {
             code(code,language) {
                 if (language === 'plantuml') {
-                    let target = API.base+"/uml?txt="+encodeURIComponent(code);
+                    let target = "/uml?txt="+encodeURIComponent(code);
                     return `<img src=${target} alt="UML Diagram"></img>`
                 } else return false;
             }
