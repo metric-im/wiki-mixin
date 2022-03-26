@@ -1,7 +1,7 @@
 {
-  "name": "@metric-im/wiki-server",
+  "name": "@metric-im/wiki-mixin",
   "version": "1.1.0",
-  "description": "simple markdown wiki",
+  "description": "simple markdown wiki for integration with app-harness",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

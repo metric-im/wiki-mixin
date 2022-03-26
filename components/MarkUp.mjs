@@ -1,9 +1,9 @@
-import {marked} from "/_wiki/lib/marked";
-import WikiWord from "/_wiki/components/WikiWord.js";
+import {marked} from "/lib/marked";
+import WikiWord from "./WikiWord.mjs";
 
 export default class MarkUp {
     constructor() {
-        this.wikiWord = new WikiWord('/');
+        this.wikiWord = new WikiWord('/#Wiki');
         const plantuml = {
             code(code,language) {
                 if (language === 'plantuml') {

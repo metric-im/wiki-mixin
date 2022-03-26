@@ -1,0 +1,47 @@
+. {
+    position:relative;
+    display:flex;
+    flex:1 1;
+    width:100%;
+    min-height:200px;
+    box-sizing:border-box;
+}
+.content {
+    position:relative;
+    flex:1 0;
+    height:100%;
+    overflow-y:auto;
+}
+.control {
+    position:relative;
+    flex:38px 0;
+    display: inline-flex;
+    flex-direction: column;
+}
+.content .doclet-editor {
+    display:none;
+    height:calc(100% - 14px);
+    width:calc(100% - 14px);
+    border:0;
+    padding:6px;
+    overflow:auto;
+    white-space: pre;
+    resize: none;
+}
+.content .doclet-render {
+    display:none;
+}
+button {
+    display:none;
+    background-color:var(--tray-bg);
+    padding:0;
+    margin-right:4px;
+    cursor:pointer;
+    border:1px solid var(--text-color);
+    border-radius:10px;
+    width:32px;
+    height:32px;
+}
+button:hover {
+    background-color: var(--page-action);
+}

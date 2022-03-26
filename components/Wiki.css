@@ -1,0 +1,79 @@
+. {
+    overflow-y:auto;
+    height:100%;
+}
+TextArea h1 {
+    margin-top:0;
+}
+#doclet-container {
+    width:calc(100% - var(--spacer2));
+    height:calc(100% - var(--spacer2));
+    padding:var(--spacer);
+}
+ #doclet-controls BUTTON {
+    display:none;
+}
+#doclet-controls:not(.editing) BUTTON.rendering {
+    display:block;
+}
+#doclet-controls.editing BUTTON.editing {
+    display:block;
+}
+#doclet-container #render-container,#doclet-container #editor-container {
+    display:none;
+    height:100%;
+    width:100%;
+}
+#doclet-container:not(.editing) #render-container {
+    display:flex;
+    flex-direction: row;
+}
+#doclet-container.editing #editor-container {
+    display:flex;
+    flex-direction:column;
+}
+#doclet-container #doclet-menu {
+    flex:100px 0;
+}
+#doclet-container #doclet-properties {
+    display:flex;
+    flex-direction: row;
+    margin-bottom:var(--spacer);
+}
+#doclet-container #doclet-properties DIV:not(:first-child) {
+    margin-left: var(--spacer);
+}
+#doclet-container #doclet-render {
+    flex:1 0;
+}
+#doclet-container #doclet-editor {
+    flex:1 0;
+}
+#doclet-controls {
+    position:absolute;
+    right: 16px;
+    display: inline-flex;
+    margin-top:-12px;
+    height:30px;
+    align-self:flex-end;
+}
+.page-controls {
+    display: flex;
+    margin-top:var(--spacer);
+    height:30px;
+    align-self:flex-end;
+}
+button {
+    display:none;
+    background-color:var(--tray-bg);
+    padding:0;
+    margin-right:4px;
+    cursor:pointer;
+    border:1px solid var(--text-color);
+    border-radius:10px;
+    width:32px;
+    height:32px;
+}
+button:hover {
+    background-color:var(--page-action);
+}

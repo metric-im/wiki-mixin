@@ -1,14 +1,13 @@
+import Component from './Component.mjs';
 import MarkUp from './MarkUp.mjs';
 
-export default class Block {
+export default class WikiBlock extends Component {
     constructor(props) {
-        this.props = props;
-        this.element = document.createElement("div");
+        super(props);
         this.markUp = new MarkUp();
     }
     async render(element) {
-        element.appendChild(this.element);
-        this.element.classList.add('wiki-block')
+        await super.render(element);
         this.element.innerHTML=`
             <div class="content">
                 <div class="doclet-render rendering"></div>

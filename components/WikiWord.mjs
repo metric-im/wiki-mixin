@@ -23,7 +23,7 @@ export default class WikiWord {
         for (let line of lines) {
             if (line.match(/^(```|~~~)/)) skipping = !skipping;
             if (!skipping) {
-                line = line.replace(/(^|[^a-zA-Z0-9_\-=.["'}{\\/])([!A-Z][A-Z0-9]*[a-z][a-z0-9_]*[A-Z][A-Za-z0-9_]*)/g,(match,pre,word)=>{
+                line = line.replace(/(^|[^a-zA-Z0-9:_\-=.["'}{\\/])([!A-Z][A-Z0-9]*[a-z][a-z0-9_]*[A-Z][A-Za-z0-9_]*)/g,(match,pre,word)=>{
                     if (word.charAt(0) === '!') return pre+(word.slice(1));
                     else if (pre === "W:") return `[${word}](wikipedia.org?s=${word})`;
                     else if (pre === "G:") return `[${word}](google.com?s=${word})`;

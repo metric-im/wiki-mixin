@@ -1,15 +1,19 @@
-import API from "/_wiki/components/API.js";
-import {marked} from "/_wiki/lib/marked";
-import WikiWord from "/_wiki/components/WikiWord.js";
+import Component from './Component.mjs';
+import API from "./API.mjs";
+import {marked} from "/lib/marked";
+import WikiWord from "./WikiWord.mjs";
 import {InputID,InputText} from "./InputText.mjs";
-import {InputSelect} from "./InputSelect.mjs";
+import MarkUp from "./MarkUp.mjs";
+import {InputModifiedDate} from "./InputDate.mjs";
 import {InputToggle} from "./InputToggle.mjs";
 
-export default class Page {
-    constructor(docId,path) {
-        this.docId = docId || "";
+export default class WikiPage extends Component {
+    constructor(props) {
+        super(props);
+        this.docId = this.props.docId || "";
         this.doclet = {};
-        this.path = path || "/";
+        this.path = this.props.path || "/";
+        this.markUp = new MarkUp();
     }
     async render(element) {
         this.doclet = await API.get('/wiki/'+this.docId);
@@ -19,7 +23,7 @@ export default class Page {
             <div id="doclet-controls"></div>
             <div id="doclet-container">
                 <div id="render-container" class="rendering">
-                    <div id="doclet-menu">menu</div>
+                    <div id="doclet-menu"></div>
                     <div id="doclet-render"></div>                
                 </div>
                 <div id="editor-container" class="editing">
@@ -32,15 +36,25 @@ export default class Page {
         this.editor = this.element.querySelector('#doclet-editor');
         await this.addControls();
         await this.addProperties();
+        await this.addMenu();
         this.wikiWord = new WikiWord(this.path);
         this.prepareMarked();
         this.editing(false);
-        this.renderHtml();
+        this.html.innerHTML = this.markUp.render(this.doclet.body);
+    }
+    async addMenu() {
+        this.docletMenu = this.element.querySelector('#doclet-menu');
     }
     async addProperties() {
         this.docletProperties = this.element.querySelector('#doclet-properties');
-        this.elementID = this.new(InputID,{data:this.doclet});
-
+        this.elementID = this.new(InputID,{title:"Doclet ID",data:this.doclet});
+        await this.elementID.render(this.docletProperties);
+        this.elementTitle = this.new(InputText,{title:"Title",data:this.doclet});
+        await this.elementTitle.render(this.docletProperties);
+        let modDate = this.new(InputModifiedDate,{data:this.doclet});
+        await modDate.render(this.docletProperties);
+        let list = this.new(InputToggle,{name:"listed",title:"List",data:this.doclet});
+        await list.render(this.docletProperties);
     }
     async addControls() {
         this.controls = this.element.querySelector("#doclet-controls");
@@ -69,15 +83,10 @@ export default class Page {
         };
         marked.use({gfm:true,renderer:plantuml});
     }
-    renderHtml() {
-        let wordified = this.wikiWord.process(this.doclet.body);
-        this.html.innerHTML = marked(wordified)+"\n<style>\n.doclet-container h1{margin-top:0}\n</style>";
-    }
     async save() {
         let result = await API.put('/wiki/'+this.doclet._id,this.doclet);
         if (result.ok) {
             this.doclet = result.value;
-            //TODO: remove explicit dependency on metric app-server
             if (window.metric) window.metric.toast.success('saved');
         } else {
             if (window.metric) window.metric.toast.error('there was an error saving the doclet. See console.');
@@ -92,7 +101,7 @@ export default class Page {
     }
     doneEditing() {
         this.doclet.body = this.editor.value;
-        this.renderHtml();
+        this.html.innerHTML = this.markUp.render(this.doclet.body);
         this.editing(false);
     }
     cancelEditing() {
@@ -106,11 +115,5 @@ export default class Page {
             this.container.classList.remove('editing');
             this.controls.classList.remove('editing');
         }
-        // this.element.querySelectorAll('.editing').forEach((item)=>{
-        //     item.style.display=yes?'block':'none';
-        // })
-        // this.element.querySelectorAll('.rendering').forEach((item)=>{
-        //     item.style.display=yes?'none':'block';
-        // })
     }
 }
