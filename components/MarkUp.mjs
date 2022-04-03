@@ -15,8 +15,8 @@ export default class MarkUp {
         marked.use({gfm:true,renderer:plantuml});
         this.marked = marked;
     }
-    render(body) {
-        let wordified = this.wikiWord.process(body);
+    render(body,pid) {
+        let wordified = this.wikiWord.process(body,pid);
         return marked(wordified)+"\n<style>\n.doclet-container h1{margin-top:0}\n</style>";
     }
 }

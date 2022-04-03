@@ -27,6 +27,24 @@ class Wiki {
                 res.status(e.status||500).json({status:"error",message:e.message});
             }
         });
+        router.get('/wikitoc/:root?',async (req,res)=>{
+            let doclets = await this.collection.find({listed:true}).project({_id:1,_pid:1,title:1}).toArray();
+            let result = [doclets.find(d=>(d._id===(req.params.root||this.rootDoc)))];
+            let maxDepth = 10;
+            let depth = 0;
+            traverse(result[0]);
+            function traverse(parent) {
+                if (++depth > maxDepth) return;
+                for (let doc of doclets) {
+                    if (doc._pid && doc._pid === parent._id) {
+                        if (!parent.children) parent.children = [];
+                        parent.children.push(doc);
+                        traverse(doc);
+                    }
+                }
+            }
+            res.json(result);
+        })
 
         return router;
     }
@@ -34,7 +52,7 @@ class Wiki {
         try {
             if (!docId) docId = this.rootDoc;
             let doclet = await this.collection.findOne({_id:docId});
-            if (!doclet) doclet = {_id:docId,title:docId,body:`# ${docId}\n`};
+            if (!doclet) doclet = {_id:docId,_pid:options.pid,title:docId,listed:true,body:`# ${docId}\n`};
             return doclet;
         } catch(e) {
             return '# '+docId;

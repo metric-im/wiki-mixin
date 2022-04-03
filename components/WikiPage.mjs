@@ -1,7 +1,6 @@
 import Component from './Component.mjs';
 import API from "./API.mjs";
 import {marked} from "/lib/marked";
-import WikiWord from "./WikiWord.mjs";
 import {InputID,InputText} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
@@ -16,14 +15,14 @@ export default class WikiPage extends Component {
         this.markUp = new MarkUp();
     }
     async render(element) {
+        await super.render(element);
         this.doclet = await API.get('/wiki/'+this.docId);
-        this.element = element;
-        this.element.classList.add('wiki');
+        // this.element.classList.add('wiki');
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
             <div id="doclet-container">
                 <div id="render-container" class="rendering">
-                    <div id="doclet-menu"></div>
+                    <div id="doclet-menu" class="menu"></div>
                     <div id="doclet-render"></div>                
                 </div>
                 <div id="editor-container" class="editing">
@@ -37,19 +36,33 @@ export default class WikiPage extends Component {
         await this.addControls();
         await this.addProperties();
         await this.addMenu();
-        this.wikiWord = new WikiWord(this.path);
         this.prepareMarked();
         this.editing(false);
-        this.html.innerHTML = this.markUp.render(this.doclet.body);
+        this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
     }
     async addMenu() {
         this.docletMenu = this.element.querySelector('#doclet-menu');
+        this.docletMenu.innerHTML = "";
+        let toc = await API.get('/wikitoc/');
+        draw.call(this,this.docletMenu,toc[0]||[]);
+        function draw(elem,doc) {
+            let me = this.div('menuitem',elem);
+            let label = this.div('label',me);
+            label.innerHTML = doc.title || doc._id;
+            label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id;})
+            if (doc.children && doc.children.length > 0) {
+                let tray = this.div('tray',me);
+                for (let d of doc.children||[]) draw.call(this,tray,d);
+            }
+        }
     }
     async addProperties() {
         this.docletProperties = this.element.querySelector('#doclet-properties');
         this.elementID = this.new(InputID,{title:"Doclet ID",data:this.doclet});
         await this.elementID.render(this.docletProperties);
-        this.elementTitle = this.new(InputText,{title:"Title",data:this.doclet});
+        this.parentID = this.new(InputText,{name:"_pid",title:"Parent ID",data:this.doclet});
+        await this.parentID.render(this.docletProperties);
+        this.elementTitle = this.new(InputText,{name:"title",title:"Title",data:this.doclet});
         await this.elementTitle.render(this.docletProperties);
         let modDate = this.new(InputModifiedDate,{data:this.doclet});
         await modDate.render(this.docletProperties);
@@ -88,6 +101,7 @@ export default class WikiPage extends Component {
         if (result.ok) {
             this.doclet = result.value;
             if (window.metric) window.metric.toast.success('saved');
+            await this.addMenu();
         } else {
             if (window.metric) window.metric.toast.error('there was an error saving the doclet. See console.');
             console.log(result.lastErrorObject);
@@ -101,7 +115,7 @@ export default class WikiPage extends Component {
     }
     doneEditing() {
         this.doclet.body = this.editor.value;
-        this.html.innerHTML = this.markUp.render(this.doclet.body);
+        this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
         this.editing(false);
     }
     cancelEditing() {

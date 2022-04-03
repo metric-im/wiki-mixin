@@ -16,7 +16,7 @@ export default class WikiWord {
      * can be ignored by prefacing it with a bang (exclamation)
      * @returns {string}
      */
-    process(text) {
+    process(text,pid) {
         let lines = text.split('\n');
         let newLines = [];
         let skipping = false;
@@ -27,7 +27,7 @@ export default class WikiWord {
                     if (word.charAt(0) === '!') return pre+(word.slice(1));
                     else if (pre === "W:") return `[${word}](wikipedia.org?s=${word})`;
                     else if (pre === "G:") return `[${word}](google.com?s=${word})`;
-                    else return `${pre}[${word}](${this.path}/${word})`;
+                    else return `${pre}[${word}](${this.path}/${word}${pid?"?pid="+pid:""})`;
                 });
             }
             newLines.push(line);

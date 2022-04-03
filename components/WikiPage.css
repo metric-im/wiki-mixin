@@ -1,0 +1,22 @@
+. {
+    height:100%;
+}
+.menu {
+    font-size: 0.8em;
+    border-right:1px dotted var(--text-quiet);
+}
+#doclet-render {
+    margin-left:var(--spacerhalf);
+}
+.menuitem {
+    margin-left:3px;
+    margin-top:var(--spacerthird);
+    color:var(--text-quiet);
+}
+.menuitem .label:hover {
+    color:var(--text-color);
+    cursor:pointer;
+}
+.menuitem .tray {
+    margin-top:var(--spacerthird);
+}
