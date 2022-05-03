@@ -36,7 +36,6 @@ export default class WikiPage extends Component {
         await this.addControls();
         await this.addProperties();
         await this.addMenu();
-        this.prepareMarked();
         this.editing(false);
         this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
     }
@@ -99,7 +98,6 @@ export default class WikiPage extends Component {
     async save() {
         let result = await API.put('/wiki/'+this.doclet._id,this.doclet);
         if (result.ok) {
-            this.doclet = result.value;
             if (window.metric) window.metric.toast.success('saved');
             await this.addMenu();
         } else {

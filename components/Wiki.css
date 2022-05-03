@@ -10,8 +10,17 @@ TextArea h1 {
     height:calc(100% - var(--spacer2));
     padding:var(--spacer);
 }
- #doclet-controls BUTTON {
+#doclet-controls BUTTON {
     display:none;
+}
+#doclet-container .frame-set {
+    display:flex;
+    flex-wrap: wrap;
+}
+#doclet-container .frame-set IFRAME {
+    min-width:300px;
+    min-height:300px;
+    border:1px solid var(--page-border);
 }
 #doclet-controls:not(.editing) BUTTON.rendering {
     display:block;
