@@ -5,6 +5,7 @@
     font-size: 0.8em;
     border-right:1px dotted var(--text-quiet);
 }
+
 #doclet-render {
     margin-left:var(--spacerhalf);
 }
@@ -19,4 +20,10 @@
 }
 .menuitem .tray {
     margin-top:var(--spacerthird);
+}
+.menuitem.root-menu {
+    position:fixed;
+    width:120px;
+    margin-top:0;
+    margin-left:-3px;
 }

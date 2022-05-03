@@ -13,11 +13,11 @@ TextArea h1 {
 #doclet-controls BUTTON {
     display:none;
 }
-#doclet-container .frame-set {
+.doclet-render .frame-set {
     display:flex;
     flex-wrap: wrap;
 }
-#doclet-container .frame-set IFRAME {
+.doclet-render .frame-set IFRAME {
     min-width:300px;
     min-height:300px;
     border:1px solid var(--page-border);
@@ -42,15 +42,16 @@ TextArea h1 {
     flex-direction:column;
 }
 #doclet-container #doclet-menu {
-    flex:100px 0;
+    flex:120px 0;
 }
 #doclet-container #doclet-properties {
     display:flex;
     flex-direction: row;
     margin-bottom:var(--spacer);
+    flex-wrap: wrap;
 }
-#doclet-container #doclet-properties DIV:not(:first-child) {
-    margin-left: var(--spacer);
+#doclet-container #doclet-properties DIV:not(:last-child) {
+    margin-right: var(--spacer);
 }
 #doclet-container #doclet-render {
     flex:1 0;
@@ -85,4 +86,28 @@ button {
 }
 button:hover {
     background-color:var(--page-action);
+}
+
+A {
+    color:black;
+    font-weight:bold;
+    text-decoration: none;
+}
+A:hover {
+    text-decoration: underline;
+}
+
+TABLE {
+    background-color:var(--tray-bg);
+    border:1px solid var(--page-border);
+    width:100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: var(--spacerhalf) var(--spacer);
+    text-align:left;
+    vertical-align:top;
+}
+th {
+    border:1px solid var(--page-border);
 }

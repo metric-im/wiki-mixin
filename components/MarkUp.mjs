@@ -22,6 +22,6 @@ export default class MarkUp {
     }
     render(body,pid) {
         let wordified = this.wikiWord.process(body,pid);
-        return marked(wordified)+"\n<style>\n.doclet-container h1{margin-top:0}\n</style>";
+        return marked(wordified)+"\n<style>\n.doclet-render h1{margin-top:0}\n</style>";
     }
 }

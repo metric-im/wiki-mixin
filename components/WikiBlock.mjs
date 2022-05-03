@@ -8,6 +8,7 @@ export default class WikiBlock extends Component {
     }
     async render(element) {
         await super.render(element);
+        this.element.classList.add('Wiki');
         this.element.innerHTML=`
             <div class="content">
                 <div class="doclet-render rendering"></div>

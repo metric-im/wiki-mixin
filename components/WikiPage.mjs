@@ -1,7 +1,7 @@
 import Component from './Component.mjs';
 import API from "./API.mjs";
 import {marked} from "/lib/marked";
-import {InputID,InputText} from "./InputText.mjs";
+import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
 import {InputToggle} from "./InputToggle.mjs";
@@ -43,7 +43,8 @@ export default class WikiPage extends Component {
         this.docletMenu = this.element.querySelector('#doclet-menu');
         this.docletMenu.innerHTML = "";
         let toc = await API.get('/wikitoc/');
-        draw.call(this,this.docletMenu,toc[0]||[]);
+        let rootMenu = draw.call(this,this.docletMenu,toc[0]||[]);
+        rootMenu.classList.add('root-menu')
         function draw(elem,doc) {
             let me = this.div('menuitem',elem);
             let label = this.div('label',me);
@@ -53,6 +54,7 @@ export default class WikiPage extends Component {
                 let tray = this.div('tray',me);
                 for (let d of doc.children||[]) draw.call(this,tray,d);
             }
+            return me;
         }
     }
     async addProperties() {
@@ -65,7 +67,7 @@ export default class WikiPage extends Component {
         await this.elementTitle.render(this.docletProperties);
         let modDate = this.new(InputModifiedDate,{data:this.doclet});
         await modDate.render(this.docletProperties);
-        let list = this.new(InputToggle,{name:"listed",title:"List",data:this.doclet});
+        let list = this.new(InputNumber,{name:"listed",title:"List Order",data:this.doclet});
         await list.render(this.docletProperties);
     }
     async addControls() {

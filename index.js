@@ -28,7 +28,9 @@ class Wiki {
             }
         });
         router.get('/wikitoc/:root?',async (req,res)=>{
-            let doclets = await this.collection.find({listed:true}).project({_id:1,_pid:1,title:1}).toArray();
+            let doclets = await this.collection.find({listed:{$gt:0}})
+                .sort({_pid:1,listed:1,_id:1})
+                .project({_id:1,_pid:1,title:1}).toArray();
             let result = [doclets.find(d=>(d._id===(req.params.root||this.rootDoc)))];
             let maxDepth = 10;
             let depth = 0;
