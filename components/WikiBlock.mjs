@@ -14,7 +14,7 @@ export default class WikiBlock extends Component {
                 <textarea class="doclet-editor editing"></textarea>
             </div>
             <div class="control"></div>`;
-        this.addControls();
+        if (!this.props.readonly) this.addControls();
         this.docHtml = this.element.querySelector('.doclet-render');
         this.docEdit = this.element.querySelector('.doclet-editor');
         this.docHtml.innerHTML = this.markUp.render(this.props.data[this.props.name]||"");
