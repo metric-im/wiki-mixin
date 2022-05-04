@@ -14,6 +14,7 @@
 .doclet-render .frame-set {
     display:flex;
     flex-wrap: wrap;
+    justify-content: space-around;
 }
 .doclet-render .frame-set IFRAME {
     min-width:300px;
