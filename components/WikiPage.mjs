@@ -27,7 +27,7 @@ export default class WikiPage extends Component {
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
-                    <textarea id="doclet-editor"></textarea>
+                    <textarea id="doclet-editor" wrap="soft"></textarea>
                 </div>
             </div>`;
         this.container = this.element.querySelector('#doclet-container');

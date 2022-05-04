@@ -28,8 +28,6 @@
     width:calc(100% - 14px);
     border:0;
     padding:6px;
-    overflow:auto;
-    white-space: pre;
     resize: none;
 }
 .content .doclet-render {

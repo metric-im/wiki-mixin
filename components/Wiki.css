@@ -2,9 +2,7 @@
     overflow-y:auto;
     height:100%;
 }
-TextArea h1 {
-    margin-top:0;
-}
+
 #doclet-container {
     width:calc(100% - var(--spacer2));
     height:calc(100% - var(--spacer2));

@@ -12,7 +12,7 @@ export default class WikiBlock extends Component {
         this.element.innerHTML=`
             <div class="content">
                 <div class="doclet-render rendering"></div>
-                <textarea class="doclet-editor editing"></textarea>
+                <textarea class="doclet-editor editing" wrap="soft"></textarea>
             </div>
             <div class="control"></div>`;
         if (!this.props.readonly) this.addControls();
