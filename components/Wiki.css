@@ -82,6 +82,7 @@ button {
     border-radius:10px;
     width:32px;
     height:32px;
+    font-size:1.2em;
 }
 button:hover {
     background-color:var(--page-action);
