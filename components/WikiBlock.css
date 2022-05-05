@@ -22,6 +22,12 @@
     flex-direction: column;
     right:0;
 }
+.content.read-only {
+    right:0;
+}
+.control.read-only {
+    display:none;
+}
 .content .doclet-editor {
     display:none;
     height:calc(100% - 14px);
