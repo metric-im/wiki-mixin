@@ -1,14 +1,17 @@
-const Identifier = require("@metric-im/identifier");
-
-class Wiki {
+import express from 'express';
+import plantuml from 'node-plantuml';
+import path from "path";
+import {fileURLToPath} from "url";
+export default class Wiki {
     constructor(connector) {
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "WikiHome";
+        this.rootPath = path.dirname(fileURLToPath(import.meta.url));
+        this.componentPath = this.rootPath+'/components';
     }
     routes() {
-        const plantuml = require('node-plantuml');
-        const router = require('express').Router();
+        const router = express.Router();
         router.all("/wiki/:docId?",async(req,res)=>{
             try {
                 let result = await this[req.method.toLowerCase()](req.params.docId,req.query,req.body);
@@ -68,5 +71,3 @@ class Wiki {
         return doclet;
     }
 }
-
-module.exports = Wiki;

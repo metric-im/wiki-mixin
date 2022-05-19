@@ -2,14 +2,13 @@
   "name": "@metric-im/wiki-mixin",
   "version": "1.1.0",
   "description": "simple markdown wiki for integration with app-harness",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Michael Sprague",
   "license": "MIT",
   "dependencies": {
-    "@metric-im/identifier": "^1.0.0",
     "express": "^4.17.1",
     "marked": "^4.0.7",
     "moment": "^2.29.1",
