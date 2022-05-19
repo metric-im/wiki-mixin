@@ -1,4 +1,5 @@
 . {
+    overflow-y:auto;
     height:100%;
 }
 .menu {
@@ -8,6 +9,9 @@
 
 #doclet-render {
     margin-left:var(--spacerhalf);
+}
+#doclet-content {
+    position:relative;
 }
 .menuitem {
     margin-left:3px;

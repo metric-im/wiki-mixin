@@ -1,12 +1,9 @@
 . {
-    overflow-y:auto;
-    height:100%;
 }
 
 #doclet-container {
-    width:calc(100% - var(--spacer2));
-    height:calc(100% - var(--spacer2));
-    padding:var(--spacer);
+    width:100%;
+    height:100%;
 }
 #doclet-controls BUTTON {
     display:none;
@@ -27,10 +24,17 @@
 #doclet-controls.editing BUTTON.editing {
     display:block;
 }
-#doclet-container #render-container,#doclet-container #editor-container {
+#doclet-container #render-container {
     display:none;
     height:100%;
     width:100%;
+}
+#doclet-container #editor-container {
+    position:absolute;
+    display:none;
+    height:calc(100% - var(--spacer2));
+    width:calc(100% - var(--spacer2));
+    padding:var(--spacer);
 }
 #doclet-container:not(.editing) #render-container {
     display:flex;
@@ -42,11 +46,13 @@
 }
 #doclet-container #doclet-menu {
     flex:120px 0;
+    padding:var(--spacer);
 }
 #doclet-container #doclet-properties {
     display:flex;
     flex-direction: row;
     margin-bottom:var(--spacer);
+    margin-right:100px;
     flex-wrap: wrap;
 }
 #doclet-container #doclet-properties DIV:not(:last-child) {
@@ -54,6 +60,7 @@
 }
 #doclet-container #doclet-render {
     flex:1 0;
+    padding:var(--spacer);
 }
 #doclet-container #doclet-editor {
     flex:1 0;

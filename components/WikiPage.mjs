@@ -5,6 +5,8 @@ import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
 import {InputToggle} from "./InputToggle.mjs";
+import WikiBlock from "./WikiBlock.mjs";
+
 
 export default class WikiPage extends Component {
     constructor(props) {
@@ -23,7 +25,9 @@ export default class WikiPage extends Component {
             <div id="doclet-container">
                 <div id="render-container" class="rendering">
                     <div id="doclet-menu" class="menu"></div>
-                    <div id="doclet-render"></div>                
+                    <div id="doclet-render" class="Wiki">
+                        <div id="doclet-content" class="doclet-render"></div>
+                    </div>                
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
@@ -31,7 +35,7 @@ export default class WikiPage extends Component {
                 </div>
             </div>`;
         this.container = this.element.querySelector('#doclet-container');
-        this.html = this.element.querySelector('#doclet-render');
+        this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
         await this.addControls();
         await this.addProperties();
