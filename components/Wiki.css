@@ -1,4 +1,6 @@
 . {
+    height:100%;
+    width:100%;
 }
 
 #doclet-container {
@@ -16,7 +18,6 @@
 .doclet-render .frame-set IFRAME {
     min-width:300px;
     min-height:300px;
-    border:1px solid var(--page-border);
 }
 #doclet-controls:not(.editing) BUTTON.rendering {
     display:block;
