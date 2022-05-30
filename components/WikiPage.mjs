@@ -104,10 +104,10 @@ export default class WikiPage extends Component {
     async save() {
         let result = await API.put('/wiki/'+this.doclet._id,this.doclet);
         if (result.ok) {
-            if (window.metric) window.metric.toast.success('saved');
+            window.toast.success('saved');
             await this.addMenu();
         } else {
-            if (window.metric) window.metric.toast.error('there was an error saving the doclet. See console.');
+            window.toast.error('there was an error saving the doclet. See console.');
             console.log(result.lastErrorObject);
         }
     }
