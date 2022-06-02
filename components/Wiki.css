@@ -15,9 +15,28 @@
     flex-wrap: wrap;
     justify-content: space-around;
 }
-.doclet-render .frame-set IFRAME {
+.doclet-render .frame-set .frame-container {
+    position:relative;
     min-width:300px;
     min-height:300px;
+    margin:var(--spacer);
+}
+.doclet-render .frame-set .frame-title {
+    display:none;
+    font-size:13px;
+    height:15px;
+    background-color:var(--page-border);
+    padding:1px 5px;
+}
+.doclet-render .frame-set IFRAME {
+    height:calc(100% - 15px);
+    width:100%;
+}
+.frame-container.titled .frame-title {
+    display:block;
+}
+.frame-container.titled IFRAME {
+    height:calc(100% - 15px);
 }
 #doclet-controls:not(.editing) BUTTON.rendering {
     display:block;

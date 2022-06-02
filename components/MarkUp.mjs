@@ -10,8 +10,10 @@ export default class MarkUp {
                     let target = "/uml?txt="+encodeURIComponent(code);
                     return `<img src=${target} alt="UML Diagram"></img>`
                 } else if (language === 'frame') {
-                    let frames = code.replace(/^(?:\[(.*?)\])?(\/(?:pull|analysis)?\/.*?$)/gm, (match,style, path) => {
-                        return `<iframe ${style?'style="'+style+'"':''} src="${path.replace(/"/g,'%22')}"></iframe>`;
+                    let frames = code.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis)?\/.*?$)/gm, (match,title,style, path) => {
+                        return `<div class='frame-container ${title?'titled':''}' ${style?'style="'+style+'"':''}>`
+                        + `<div class='frame-title'>${title}</div>`
+                        + `<iframe src="${path.replace(/"/g,'%22')}"></iframe></div>`
                     });
                     return `<div class='frame-set'>\n${frames}\n</div>`
                 } else return false;
