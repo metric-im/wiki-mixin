@@ -46,6 +46,7 @@ export default class WikiBlock extends Component {
         this.docHtml.innerHTML = this.markUp.render(this.props.data[this.props.name]||"");
         this.editing(false);
         await this.announceUpdate(this.props.name);
+        this.lock.add('exit');
     }
     cancelEditing() {
         this.editing(false);
@@ -57,6 +58,8 @@ export default class WikiBlock extends Component {
         this.element.querySelectorAll('.rendering').forEach((item)=>{
             item.style.display=yes?'none':'block';
         })
+        if (yes) this.lock.add('save');
+        else this.lock.remove('save');
     }
 
     /**
