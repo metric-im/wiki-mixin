@@ -41,7 +41,6 @@
 }
 button {
     display:none;
-    background-color:var(--tray-bg);
     padding:0;
     margin-right:4px;
     cursor:pointer;
@@ -49,7 +48,4 @@ button {
     border-radius:10px;
     width:32px;
     height:32px;
-}
-button:hover {
-    background-color: var(--page-action);
 }

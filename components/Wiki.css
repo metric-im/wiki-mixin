@@ -25,7 +25,7 @@
     display:none;
     font-size:13px;
     height:15px;
-    background-color:var(--page-border);
+    background-color:var(--bg-color-d);
     padding:1px 5px;
 }
 .doclet-render .frame-set IFRAME {
@@ -92,6 +92,7 @@
     margin-top:-22px;
     height:30px;
     align-self:flex-end;
+    z-index:100;
 }
 .page-controls {
     display: flex;
@@ -101,7 +102,6 @@
 }
 button {
     display:none;
-    background-color:var(--tray-bg);
     padding:0;
     margin-right:4px;
     cursor:pointer;
@@ -110,9 +110,11 @@ button {
     width:32px;
     height:32px;
     font-size:1.2em;
+    background-color:var(--bg-color);
+    color:var(--text-color);
 }
 button:hover {
-    background-color:var(--page-action);
+    background-color:var(--action-color-hilite);
 }
 
 A {
