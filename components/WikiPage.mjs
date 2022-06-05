@@ -4,9 +4,7 @@ import {marked} from "/lib/marked";
 import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
-import {InputToggle} from "./InputToggle.mjs";
-import WikiBlock from "./WikiBlock.mjs";
-
+import {InputSelect} from "./InputSelect.mjs";
 
 export default class WikiPage extends Component {
     constructor(props) {
@@ -18,7 +16,12 @@ export default class WikiPage extends Component {
     }
     async render(element) {
         await super.render(element);
-        this.doclet = await API.get('/wiki/'+this.docId);
+        try {
+            this.doclet = await API.get('/wiki/'+this.docId);
+        } catch(e) {
+            this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
+            return;
+        }
         // this.element.classList.add('wiki');
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
@@ -65,10 +68,13 @@ export default class WikiPage extends Component {
         this.docletProperties = this.element.querySelector('#doclet-properties');
         this.elementID = this.new(InputID,{title:"Doclet ID",data:this.doclet});
         await this.elementID.render(this.docletProperties);
-        this.parentID = this.new(InputText,{name:"_pid",title:"Parent ID",data:this.doclet});
-        await this.parentID.render(this.docletProperties);
         this.elementTitle = this.new(InputText,{name:"title",title:"Title",data:this.doclet});
         await this.elementTitle.render(this.docletProperties);
+        this.parentID = this.new(InputText,{name:"_pid",title:"Parent ID",data:this.doclet});
+        await this.parentID.render(this.docletProperties);
+        this.visibility = this.new(InputSelect,{
+            name:"visibility",title:"Visibility",data:this.doclet,options:['public',this.props.context.id,this.props.context.userId]});
+        await this.visibility.render(this.docletProperties);
         let modDate = this.new(InputModifiedDate,{data:this.doclet});
         await modDate.render(this.docletProperties);
         let list = this.new(InputNumber,{name:"listed",title:"List Order",data:this.doclet});

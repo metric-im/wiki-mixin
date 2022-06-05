@@ -12,10 +12,15 @@ export default class Wiki {
     }
     routes() {
         const router = express.Router();
+        router.use('/wiki',(req,res,next)=>{
+            if (req.account && req.account.id) next();
+            else res.status(401).send();
+        })
         router.all("/wiki/:docId?",async(req,res)=>{
             try {
-                let result = await this[req.method.toLowerCase()](req.params.docId,req.query,req.body);
-                res.json(result);
+                let result = await this[req.method.toLowerCase()](req.account,req.params.docId,req.query,req.body);
+                if (!result) res.status(401).send();
+                else res.json(result);
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
                 res.status(500).send(`Error invoking ${req.method} on data: ${e.message}`);
@@ -53,17 +58,14 @@ export default class Wiki {
 
         return router;
     }
-    async get(docId,options={}) {
-        try {
-            if (!docId) docId = this.rootDoc;
-            let doclet = await this.collection.findOne({_id:docId});
-            if (!doclet) doclet = {_id:docId,_pid:options.pid,title:docId,listed:true,body:`# ${docId}\n`};
-            return doclet;
-        } catch(e) {
-            return '# '+docId;
-        }
+    async get(account,docId,options={}) {
+        if (!docId) docId = this.rootDoc;
+        let doclet = await this.collection.findOne({_id:docId});
+        if (!doclet) doclet = {_id:docId,_pid:options.pid,title:docId,visibility:account.userId,listed:true,body:`# ${docId}\n`};
+        else if (doclet.visibility && !['public',account.id,account.userId].includes(doclet.visibility)) doclet = null;
+        return doclet;
     }
-    async put(docId,options={},body={}) {
+    async put(account,docId,options={},body={}) {
         if (!body._id) body._id = docId?docId:Identifier.new;
         if (!body._created) body.create = new Date();
         body._modified = new Date();
