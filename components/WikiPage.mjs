@@ -16,12 +16,8 @@ export default class WikiPage extends Component {
     }
     async render(element) {
         await super.render(element);
-        try {
-            this.doclet = await API.get('/wiki/'+this.docId);
-        } catch(e) {
-            this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
-            return;
-        }
+        await this.load();
+        if (!this.doclet) return;
         // this.element.classList.add('wiki');
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
@@ -45,6 +41,13 @@ export default class WikiPage extends Component {
         await this.addMenu();
         this.editing(false);
         this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
+    }
+    async load() {
+        try {
+            this.doclet = await API.get('/wiki/'+this.docId);
+        } catch(e) {
+            this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
+        }
     }
     async addMenu() {
         this.docletMenu = this.element.querySelector('#doclet-menu');
