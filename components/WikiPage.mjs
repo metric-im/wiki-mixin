@@ -5,6 +5,7 @@ import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
 import {InputSelect} from "./InputSelect.mjs";
+import {InputToggle} from "./InputToggle.mjs";
 
 export default class WikiPage extends Component {
     constructor(props) {
@@ -13,12 +14,12 @@ export default class WikiPage extends Component {
         this.doclet = {};
         this.path = this.props.path || "/";
         this.markUp = new MarkUp();
+        this.menu = new WikiMenu(this);
     }
     async render(element) {
         await super.render(element);
         await this.load();
         if (!this.doclet) return;
-        // this.element.classList.add('wiki');
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
             <div id="doclet-container">
@@ -38,50 +39,46 @@ export default class WikiPage extends Component {
         this.editor = this.element.querySelector('#doclet-editor');
         await this.addControls();
         await this.addProperties();
-        await this.addMenu();
+        await this.menu.render(this.element,this.doclet);
         this.editing(false);
         this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
     }
     async load() {
         try {
+            this.index = await API.get('/wiki/index');
             this.doclet = await API.get('/wiki/'+this.docId);
         } catch(e) {
             this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
         }
     }
-    async addMenu() {
-        this.docletMenu = this.element.querySelector('#doclet-menu');
-        this.docletMenu.innerHTML = "";
-        let toc = await API.get('/wikitoc/');
-        let rootMenu = draw.call(this,this.docletMenu,toc[0]||[]);
-        rootMenu.classList.add('root-menu')
-        function draw(elem,doc) {
-            let me = this.div('menuitem',elem);
-            let label = this.div('label',me);
-            label.innerHTML = doc.title || doc._id;
-            label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id;})
-            if (doc.children && doc.children.length > 0) {
-                let tray = this.div('tray',me);
-                for (let d of doc.children||[]) draw.call(this,tray,d);
-            }
-            return me;
-        }
-    }
     async addProperties() {
         this.docletProperties = this.element.querySelector('#doclet-properties');
-        this.elementID = this.new(InputID,{title:"Doclet ID",data:this.doclet});
+        if (!this.doclet._id) this.doclet._id = {a:this.props.context.userId};
+        if (!this.doclet._pid) this.doclet._pid = {};
+        this.elementID = this.new(InputID,{name:"d",title:"Doclet ID",data:this.doclet._id,allowEdit:true});
         await this.elementID.render(this.docletProperties);
         this.elementTitle = this.new(InputText,{name:"title",title:"Title",data:this.doclet});
         await this.elementTitle.render(this.docletProperties);
-        this.parentID = this.new(InputText,{name:"_pid",title:"Parent ID",data:this.doclet});
+        if (this.docId!=="Home" || this.props.context.super) {
+            this.visibility = this.new(InputSelect,
+                {name:"visibility",title:"Visibility",data:this.doclet,options:[
+                        this.props.context.userId,this.props.context.id,'public'
+                    ]}
+            );
+            await this.visibility.render(this.docletProperties);
+        } else {
+            this.doclet.visibility = this.props.context.id;
+        }
+        await this.elementID.render(this.docletProperties);
+        this.parentID = this.new(InputSelect,{name:"_pid",data:this.doclet,title:"Parent Doc",
+            options:[''].concat(this.index.map(r=>({name:r._id.a+"/"+r._id.d,value:r._id})))});
         await this.parentID.render(this.docletProperties);
-        this.visibility = this.new(InputSelect,{
-            name:"visibility",title:"Visibility",data:this.doclet,options:['public',this.props.context.id,this.props.context.userId]});
-        await this.visibility.render(this.docletProperties);
-        let modDate = this.new(InputModifiedDate,{data:this.doclet});
-        await modDate.render(this.docletProperties);
+        this.rootmenu = this.new(InputToggle,{name:"rootmenu",data:this.doclet,title:"Root"});
+        await this.rootmenu.render(this.docletProperties);
         let list = this.new(InputNumber,{name:"listed",title:"List Order",data:this.doclet});
         await list.render(this.docletProperties);
+        let modDate = this.new(InputModifiedDate,{data:this.doclet});
+        await modDate.render(this.docletProperties);
     }
     async addControls() {
         this.controls = this.element.querySelector("#doclet-controls");
@@ -99,28 +96,18 @@ export default class WikiPage extends Component {
             this.controls.appendChild(button);
         }
     }
-    prepareMarked() {
-        const plantuml = {
-            code(code,language) {
-                if (language === 'plantuml') {
-                    let target = "/uml?txt="+encodeURIComponent(code);
-                    return `<img src=${target} alt="UML Diagram"></img>`
-                } else return false;
-            }
-        };
-        marked.use({gfm:true,renderer:plantuml});
-    }
     async save() {
-        let result = await API.put('/wiki/'+this.doclet._id,this.doclet);
-        if (result.ok) {
+        let result = await API.put('/wiki/'+this.doclet._id.d,this.doclet);
+        if (result) {
             window.toast.success('saved');
-            await this.addMenu();
+            await this.menu.render(this.element,this.doclet);
         } else {
             window.toast.error('there was an error saving the doclet. See console.');
             console.log(result.lastErrorObject);
         }
     }
     async remove() {
+        await window.toast.prompt(`Delete ${this.doclet._id.a}/${this.doclet._id.d}?`);
     }
     edit() {
         this.editor.value = this.doclet.body;
@@ -142,5 +129,39 @@ export default class WikiPage extends Component {
             this.container.classList.remove('editing');
             this.controls.classList.remove('editing');
         }
+    }
+}
+
+class WikiMenu {
+    constructor(wikiPage) {
+        this.page = wikiPage;
+    }
+    async render(elem,doc) {
+        this.docletMenu = this.page.element.querySelector('#doclet-menu');
+        this.docletMenu.innerHTML = "";
+        this.root = this.findRoot(doc);
+        if (!this.root) return;
+        let rootMenu = this.draw.call(this,this.docletMenu,this.root);
+        rootMenu.classList.add('root-menu');
+    }
+    draw(elem,doc) {
+        let me = this.page.div('menuitem',elem);
+        let label = this.page.div('label',me);
+        label.innerHTML = doc.title || doc._id.d;
+        label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d;})
+        let children = this.page.index.filter(r=>(r._pid&&r._pid.a===doc._id.a&&r._pid.d===doc._id.d));
+        if (children && children.length > 0) {
+            let tray = this.page.div('tray',me);
+            for (let d of children||[]) this.draw(tray,d);
+        }
+        return me;
+    }
+    findRoot(doc) {
+        if (!doc) return null;
+        if (doc.rootmenu) return doc;
+        if (!doc._pid) return null;
+        else return this.findRoot(this.page.index.find(r=>(
+            r._id.a===doc._pid.a&&r._id.d===doc._pid.d
+        )))
     }
 }
