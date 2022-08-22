@@ -23,7 +23,7 @@ export default class MarkUp {
         marked.use({gfm:true,renderer:extensions});
         this.marked = marked;
     }
-    async render(body,options) {
+    async render(body,options={}) {
         let fm = new FireMacro(body);
         body = await fm.parse(options);
         let wordified = this.wikiWord.process(body,options._pid);
