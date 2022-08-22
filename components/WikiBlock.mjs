@@ -18,7 +18,7 @@ export default class WikiBlock extends Component {
         this.addControls();
         this.docHtml = this.element.querySelector('.doclet-render');
         this.docEdit = this.element.querySelector('.doclet-editor');
-        this.docHtml.innerHTML = this.markUp.render(this.props.data[this.props.name]||"");
+        this.docHtml.innerHTML = await this.markUp.render(this.props.data[this.props.name]||"");
         this.docEdit.value = this.props.data[this.props.name]||"";
         this.editing(false);
     }
@@ -43,7 +43,7 @@ export default class WikiBlock extends Component {
     }
     async doneEditing() {
         this.props.data[this.props.name] = this.docEdit.value;
-        this.docHtml.innerHTML = this.markUp.render(this.props.data[this.props.name]||"");
+        this.docHtml.innerHTML = await this.markUp.render(this.props.data[this.props.name]||"");
         this.editing(false);
         await this.announceUpdate(this.props.name);
         this.lock.add('exit');

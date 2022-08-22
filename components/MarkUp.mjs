@@ -1,5 +1,6 @@
 import {marked} from "/lib/marked";
 import WikiWord from "./WikiWord.mjs";
+import FireMacro from "./FireMacro.mjs";
 
 export default class MarkUp {
     constructor() {
@@ -22,8 +23,10 @@ export default class MarkUp {
         marked.use({gfm:true,renderer:extensions});
         this.marked = marked;
     }
-    render(body,pid) {
-        let wordified = this.wikiWord.process(body,pid);
+    async render(body,options) {
+        let fm = new FireMacro(body);
+        body = await fm.parse(options);
+        let wordified = this.wikiWord.process(body,options._pid);
         return marked(wordified)+"\n<style>\n.doclet-render h1{margin-top:0}\n</style>";
     }
 }

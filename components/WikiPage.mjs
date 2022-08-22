@@ -16,8 +16,9 @@ export default class WikiPage extends Component {
         this.markUp = new MarkUp();
         this.menu = new WikiMenu(this);
     }
-    async render(element) {
+    async render(element,options={}) {
         await super.render(element);
+        this.options = options;
         await this.load();
         if (!this.doclet) return;
         this.element.innerHTML = `
@@ -41,7 +42,8 @@ export default class WikiPage extends Component {
         await this.addProperties();
         await this.menu.render(this.element,this.doclet);
         this.editing(false);
-        this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
+        options._pid = this.doclet._id;
+        this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
     }
     async load() {
         try {
@@ -113,9 +115,9 @@ export default class WikiPage extends Component {
         this.editor.value = this.doclet.body;
         this.editing(true);
     }
-    doneEditing() {
+    async doneEditing() {
         this.doclet.body = this.editor.value;
-        this.html.innerHTML = this.markUp.render(this.doclet.body,this.doclet._id);
+        this.html.innerHTML = await this.markUp.render(this.doclet.body,this.options);
         this.editing(false);
     }
     cancelEditing() {
