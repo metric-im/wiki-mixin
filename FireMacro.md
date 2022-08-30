@@ -533,7 +533,7 @@ const ft = new Firetext(macro).parse({attribute:"data",data:3});
 // result is 3
 ```
 
-If no attribute name is specified then $value is replaced with the
+If no attribute name is specified then $value is replaced with 
 the object on top of the data stack
 
 ```
