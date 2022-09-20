@@ -140,9 +140,9 @@ class WikiMenu {
     }
     async render(elem,doc) {
         this.docletMenu = this.page.element.querySelector('#doclet-menu');
-        this.docletMenu.innerHTML = "";
         this.root = this.findRoot(doc);
         if (!this.root) return;
+        this.docletMenu.innerHTML = "";
         let rootMenu = this.draw.call(this,this.docletMenu,this.root);
         rootMenu.classList.add('root-menu');
     }

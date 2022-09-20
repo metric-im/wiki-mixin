@@ -28,8 +28,9 @@ export default class WikiMixin {
         })
         router.all("/wiki/:docId?",async(req,res)=>{
             try {
-                let result = await this[req.method.toLowerCase()](req.account,req.params.docId,req.query,req.body);
-                if (!result) res.status(401).send();
+                let method = req.method.toLowerCase();
+                let result = await this[method](req.account,req.params.docId,req.query,req.body);
+                if (!result && method !== 'put') res.status(401).send();
                 else res.json(result);
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
@@ -73,9 +74,10 @@ export default class WikiMixin {
         return router;
     }
     async getIndex(account) {
-        return this.collection.find(
-            {"_id.a":{$in:['public',account.id,account.userId]}}
-        ).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        let publicResults = this.collection.find({"_id.a":'public'}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        let accountResults = this.collection.find({"_id.a":account.id}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        let userResults = this.collection.find({"_id.a":account.userId}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        return Object.assign(publicResults,accountResults,userResults);
     }
     async get(account,docId,options={}) {
         if (!docId) docId = this.rootDoc;
