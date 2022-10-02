@@ -1,32 +1,73 @@
 import {marked} from "/lib/marked";
 import WikiWord from "./WikiWord.mjs";
+import API from './API.mjs';
 import FireMacro from "./FireMacro.mjs";
+import IdForge from "./IdForge.mjs";
 
 export default class MarkUp {
     constructor() {
         this.wikiWord = new WikiWord('/#Wiki');
-        const extensions = {
-            code(code,language) {
-                if (language === 'plantuml') {
-                    let target = "/uml?txt="+encodeURIComponent(code);
-                    return `<img src=${target} alt="UML Diagram"></img>`
-                } else if (language === 'frame') {
-                    let frames = code.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric)?\/.*?$)/gm, (match,title,style, path) => {
-                        return `<div class='frame-container ${title?'titled':''}' ${style?'style="'+style+'"':''}>`
-                        + `<div class='frame-title'>${title}</div>`
-                        + `<iframe src="${path.replace(/"/g,'%22')}"></iframe></div>`
-                    });
-                    return `<div class='frame-set'>\n${frames}\n</div>`
-                } else return false;
-            }
-        };
-        marked.use({gfm:true,renderer:extensions});
         this.marked = marked;
     }
     async render(body,options={}) {
-        let fm = new FireMacro(body);
-        body = await fm.parse(options);
+        body = await this.replaceExtensionBlocks(body,options);
         let wordified = this.wikiWord.process(body,options._pid);
-        return marked(wordified)+"\n<style>\n.doclet-render h1{margin-top:0}\n</style>";
+        let result = await this.marked.parse(wordified);
+        return result+"\n<style>\n.doclet-render h1{margin-top:0}\n</style>";
+    }
+
+    /**
+     * Manually replace macro, uml and frame blocks. Marked is
+     * supposed to support async token swaps, but it doesn't work
+     * @param options
+     * @returns {Promise<void>}
+     */
+    async replaceExtensionBlocks(body,options) {
+        // first replace macro elements from query string
+        if (Object.keys(options).length>0) {
+            let fm = new FireMacro(body);
+            body = await fm.parse(options);
+        }
+        // search for extension blocks
+        let asyncBlocks = [];
+        body = body.replace(/^~{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n~{3,4}/gsm,replace.bind(this));
+        body = body.replace(/^`{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n`{3,4}/gsm,replace.bind(this));
+        function replace(match,lang,args,text) {
+            args = args?args.slice(1,-1).split(','):[];
+            if (lang === 'plantuml') {
+                let target = "/uml?txt="+encodeURIComponent(text);
+                return `<img src="${target}" alt="UML Diagram"></img>`
+            } else if (lang === 'frame') {
+                let frames = text.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric)?\/.*?$)/gm, (match,title,style, path) => {
+                    return `<div class='frame-container ${title?'titled':''}' ${style?'style="'+style+'"':''}>`
+                      + `<div class='frame-title'>${title}</div>`
+                      + `<iframe src="${path.replace(/"/g,'%22')}"></iframe></div>`
+                });
+                return `<div class='frame-set'>\n${frames}\n</div>`
+            } else if (lang === 'macro') {
+                let key = IdForge.randomId(12);
+                asyncBlocks.push({key:key,lang:lang,args:args,text:text});
+                return key;
+            } else return text;
+        }
+        for (let block of asyncBlocks) {
+            if (block.lang === 'macro') {
+                let result = "";
+                if (block.args[0]) {
+                    let data = await API.get(block.args[0]);
+                    if (data) {
+                        if (!Array.isArray(data)) data = [data];
+                        let fm = new FireMacro(block.text);
+                        for (let record of data) {
+                            result += await fm.parse(record);
+                        }
+                    } else {
+                        result += "no data";
+                    }
+                }
+                body = body.replace(block.key,result);
+            }
+        }
+        return body;
     }
 }
