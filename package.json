@@ -1,6 +1,6 @@
 {
   "name": "@metric-im/wiki-mixin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "simple markdown wiki for integration with app-harness",
   "main": "index.mjs",
   "scripts": {
