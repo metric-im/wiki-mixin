@@ -41,6 +41,9 @@
 #doclet-controls:not(.editing) BUTTON.rendering {
     display:block;
 }
+.modified .important-if-modified {
+    background-color:var(--status-warning);
+}
 #doclet-controls.editing BUTTON.editing {
     display:block;
 }

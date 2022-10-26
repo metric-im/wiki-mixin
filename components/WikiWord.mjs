@@ -27,7 +27,7 @@ export default class WikiWord {
                     if (word.charAt(0) === '!') return pre+(word.slice(1));
                     else if (pre === "W:") return `[${word}](wikipedia.org?s=${word})`;
                     else if (pre === "G:") return `[${word}](google.com?s=${word})`;
-                    else return `${pre}[${word}](${this.path}/${word}${_pid?`?_pid=${_pid.d}`:""})`;
+                    else return `${pre}[${word}](${this.path}/${word}${_pid?`?_pid=${_pid}`:""})`;
                 });
             }
             newLines.push(line);

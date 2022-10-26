@@ -21,6 +21,7 @@ export default class WikiPage extends Component {
         this.options = options;
         await this.load();
         if (!this.doclet) return;
+        this.originalBody = this.doclet.body;
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
             <div id="doclet-container">
@@ -42,21 +43,22 @@ export default class WikiPage extends Component {
         await this.addProperties();
         await this.menu.render(this.element,this.doclet);
         this.editing(false);
-        options._pid = this.doclet._id;
+        options._pid = this.doclet._id.d;
         this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
     }
     async load() {
         try {
             this.index = await API.get('/wiki/index');
-            this.doclet = await API.get('/wiki/'+this.docId);
+            let qs = this.options._pid?"?_pid="+this.options._pid:"";
+            this.doclet = await API.get('/wiki/'+this.docId+qs);
         } catch(e) {
             this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
         }
     }
     async addProperties() {
         this.docletProperties = this.element.querySelector('#doclet-properties');
-        if (!this.doclet._id) this.doclet._id = {a:this.props.context.userId};
-        if (!this.doclet._pid) this.doclet._pid = {};
+        if (!this.doclet._id) this.doclet._id = {a:this.props.context.id};
+        if (!this.doclet._pid) this.doclet._pid = "";
         this.elementID = this.new(InputID,{name:"d",title:"Doclet ID",data:this.doclet._id,allowEdit:true});
         await this.elementID.render(this.docletProperties);
         this.elementTitle = this.new(InputText,{name:"title",title:"Title",data:this.doclet});
@@ -64,16 +66,17 @@ export default class WikiPage extends Component {
         if (this.docId!=="Home" || this.props.context.super) {
             this.visibility = this.new(InputSelect,
                 {name:"visibility",title:"Visibility",data:this.doclet,options:[
-                        this.props.context.userId,this.props.context.id,'public'
-                    ]}
+                    this.props.context.userId,this.props.context.id,'public'
+                ]}
             );
             await this.visibility.render(this.docletProperties);
+            this.visibility.value = this.doclet._id.a
         } else {
             this.doclet.visibility = this.props.context.id;
         }
         await this.elementID.render(this.docletProperties);
         this.parentID = this.new(InputSelect,{name:"_pid",data:this.doclet,title:"Parent Doc",
-            options:[''].concat(this.index.map(r=>({name:r._id.a+"/"+r._id.d,value:r._id})))});
+            options:[''].concat(this.index.map(r=>(r._id.d)))});
         await this.parentID.render(this.docletProperties);
         this.rootmenu = this.new(InputToggle,{name:"rootmenu",data:this.doclet,title:"Root"});
         await this.rootmenu.render(this.docletProperties);
@@ -86,7 +89,7 @@ export default class WikiPage extends Component {
         this.controls = this.element.querySelector("#doclet-controls");
         for (let b of [
             {icon:'edit',action:this.edit.bind(this),mode:'rendering'},
-            {icon:'save',action:this.save.bind(this),mode:'rendering'},
+            {icon:'save',action:this.save.bind(this),mode:'rendering',class:"important-if-modified"},
             {icon:'trash',action:this.remove.bind(this),mode:'rendering'},
             {icon:'check',action:this.doneEditing.bind(this),mode:'editing'},
             {icon:'cross',action:this.cancelEditing.bind(this),mode:'editing'}
@@ -94,15 +97,18 @@ export default class WikiPage extends Component {
             let button = document.createElement('button');
             button.innerHTML=`<span class="icon icon-${b.icon}"/>`;
             button.classList.add(b.mode);
+            if (b.class) button.classList.add(b.class);
             button.addEventListener('click',b.action);
             this.controls.appendChild(button);
         }
     }
     async save() {
+        this.element.classList.remove('modified')
         let result = await API.put('/wiki/'+this.doclet._id.d,this.doclet);
         if (result) {
             window.toast.success('saved');
-            await this.menu.render(this.element,this.doclet);
+            await this.load();
+            await this.render();
         } else {
             window.toast.error('there was an error saving the doclet. See console.');
             console.log(result.lastErrorObject);
@@ -116,6 +122,11 @@ export default class WikiPage extends Component {
         this.editing(true);
     }
     async doneEditing() {
+        if (this.editor.value !== this.originalBody) {
+            this.element.classList.add('modified')
+        } else {
+            this.element.classList.remove('modified')
+        }
         this.doclet.body = this.editor.value;
         this.html.innerHTML = await this.markUp.render(this.doclet.body,this.options);
         this.editing(false);
@@ -140,7 +151,9 @@ class WikiMenu {
     }
     async render(elem,doc) {
         this.docletMenu = this.page.element.querySelector('#doclet-menu');
-        this.root = this.findRoot(doc);
+        let docId = doc._created?doc._id.d:doc._pid;
+        let indexDoc = this.page.index.find(r=>r._id.d===docId);
+        this.root = this.findRoot(indexDoc);
         if (!this.root) return;
         this.docletMenu.innerHTML = "";
         let rootMenu = this.draw.call(this,this.docletMenu,this.root);
@@ -150,8 +163,8 @@ class WikiMenu {
         let me = this.page.div('menuitem',elem);
         let label = this.page.div('label',me);
         label.innerHTML = doc.title || doc._id.d;
-        label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d;})
-        let children = this.page.index.filter(r=>(r._pid&&r._pid.a===doc._id.a&&r._pid.d===doc._id.d));
+        label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
+        let children = this.page.index.filter(r=>(r._pid===doc._id.d));
         if (children && children.length > 0) {
             let tray = this.page.div('tray',me);
             for (let d of children||[]) this.draw(tray,d);
@@ -162,8 +175,6 @@ class WikiMenu {
         if (!doc) return null;
         if (doc.rootmenu) return doc;
         if (!doc._pid) return null;
-        else return this.findRoot(this.page.index.find(r=>(
-            r._id.a===doc._pid.a&&r._id.d===doc._pid.d
-        )))
+        else return this.findRoot(this.page.index.find(r=>r._id.d===doc._pid));
     }
 }

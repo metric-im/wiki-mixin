@@ -48,36 +48,21 @@ export default class WikiMixin {
                 res.status(e.status||500).json({status:"error",message:e.message});
             }
         });
-        router.get('/wikitoc/:root?',async (req,res)=>{
-            if (req.params.root) $match._id
-            let doclets = await this.collection.find({"_id.a":{$in:['public',req.account.id,req.account.userId]},listed:{$gt:0}})
-                .sort({_pid:1,listed:1,"_id.d":1})
-                .project({_id:1,_pid:1,title:1}).toArray();
-            let result = [doclets.find(d=>(d._id.d===(req.params.root||this.rootDoc)))];
-            if (!result[0]) return res.status(404).send();
-            let maxDepth = 10;
-            let depth = 0;
-            traverse(result[0]);
-            function traverse(parent) {
-                if (++depth > maxDepth) return;
-                for (let doc of doclets) {
-                    if (doc._pid && doc._pid.a === parent._id.a && doc._pid.d === parent._id.d) {
-                        if (!parent.children) parent.children = [];
-                        parent.children.push(doc);
-                        traverse(doc);
-                    }
-                }
-            }
-            res.json(result);
-        })
-
         return router;
     }
     async getIndex(account) {
-        let publicResults = this.collection.find({"_id.a":'public'}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
-        let accountResults = this.collection.find({"_id.a":account.id}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
-        let userResults = this.collection.find({"_id.a":account.userId}).sort({"_id.d":1}).project({_id:1,_pid:1,title:1,listed:1,rootmenu:1}).toArray();
-        return Object.assign(publicResults,accountResults,userResults);
+        let publicResults = await this.collection.find({"_id.a":'public'}).sort({"_id.d":1}).project({_id:"$_id",_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        let accountResults = await this.collection.find({"_id.a":account.id}).sort({"_id.d":1}).project({_id:"$_id",_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        let results = await this.collection.find({"_id.a":account.userId}).sort({"_id.d":1}).project({_id:"$_id",_pid:1,title:1,listed:1,rootmenu:1}).toArray();
+        for (let a of accountResults) {
+            if (results.find(r=>r._id.d===a._id.d)) continue;
+            else results.push(a);
+        }
+        for (let a of publicResults) {
+            if (results.find(r=>r._id.d===a._id.d)) continue;
+            else results.push(a);
+        }
+        return results;
     }
     async get(account,docId,options={}) {
         if (!docId) docId = this.rootDoc;
@@ -93,17 +78,42 @@ export default class WikiMixin {
             });
             doclet = doclets[0];
         } else {
-            doclet = {_id:{d:docId,a:account.userId},_pid:options.pid,title:docId,listed:true,body:`# ${docId}\n`};
+            doclet = {_id:{d:docId,a:account.id},_pid:options._pid,title:docId,listed:true,body:`# ${docId}\n`};
         }
         doclet.visibility = doclet._id.a;
         return doclet;
     }
     async put(account,docId,options={},body={}) {
         if (!docId) throw new Error('Id is required');
-        if (body._id) {
-            if (body.visibility && body._id.a !== body.visibility) body._id.a = body.visibility;
-        } else {
-            body._id = {a:body.visibility||account.userId,d:docId};
+        // initialize id
+        if (!body._id) body._id = {a:body.visibility||account.id,d:docId};
+        // get existing doc(s) across all visibility zones
+        let docList = await this.collection.find({"_id.d":docId}).toArray();
+        let docMap = {user:null,account:null,public:null}
+        for (let doc of docList) {
+            if (doc._id.a === account.userId) docMap.user = doc;
+            else if (doc._id.a === account.id) docMap.account = doc;
+            else if (doc._id.a === 'public') docMap.public = doc;
+        }
+        // manage visibility
+        let deletes = [];
+        if (body.visibility && body._id.a !== body.visibility) {
+            if (body.visibility === account.id && body._id.a === account.userId) {
+                if (docMap.account && docMap.account._modified > body._created) {
+                    throw new Error('Merge conflict');
+                } else {
+                    if (docMap.user) deletes.push(docMap.user._id);
+                }
+            }
+            if (body.visibility === 'public') {
+                if (docMap.public && docMap.public._modified > body._created) {
+                    throw new Error('Merge conflict');
+                } else {
+                    if (docMap.user) deletes.push(docMap.user._id);
+                    if (docMap.account) deletes.push(docMap.account._id);
+                }
+            }
+            body._id.a = body.visibility;
         }
         if (body._id.a === 'public' && !account.super) {
             throw new Error('unauthorized');
@@ -111,9 +121,13 @@ export default class WikiMixin {
         if (!body._created) body._created = new Date();
         if (!body._createdBy) body._createdBy = account.userId;
         body._modified = new Date();
+        delete body.visibility;
         try {
-            let doclet = await this.collection.findOneAndUpdate({_id:body._id},{$set:body},{upsert:true,returnNewDocument:true});
-            return doclet.value
+            let result = await this.collection.findOneAndUpdate({_id:body._id},{$set:body},{upsert:true,returnNewDocument:true});
+            if (result.ok && deletes.length > 0) {
+                await this.collection.deleteMany({_id:{$in:deletes}});
+            }
+            return body;
         } catch(e) {
             console.log(e);
         }
