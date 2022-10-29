@@ -40,9 +40,11 @@ export default class WikiMixin {
         router.get('/uml/',async(req,res)=>{
             try {
                 res.set('Content-Type', 'image/png');
-                let header = "";
-                if (this.umlOptions.backgroundColor) header += `skinparam backgroundColor ${this.umlOptions.backgroundColor}\n`
-                let gen = plantuml.generate(header+decodeURIComponent(req.query.txt),{format: 'png'});
+                let code = decodeURIComponent(req.query.txt)
+                code = code.replace(/^@startuml/i,"");
+                code = code.replace(/@enduml$/i,"");
+                let header = `skinparam backgroundColor transparent\n`
+                let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
                 gen.out.pipe(res);
             } catch(e) {
                 res.status(e.status||500).json({status:"error",message:e.message});
