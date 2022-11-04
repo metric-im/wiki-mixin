@@ -121,7 +121,7 @@ button:hover {
 }
 
 A {
-    color:black;
+    color:var(--action-color);
     font-weight:bold;
     text-decoration: none;
 }

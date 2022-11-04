@@ -21,9 +21,11 @@
 .menuitem .label:hover {
     color:var(--text-color);
     cursor:pointer;
+    text-decoration: underline;
 }
 .menuitem .tray {
     margin-top:var(--spacerthird);
+    margin-bottom:var(--spacer);
 }
 .menuitem.root-menu {
     position:fixed;
