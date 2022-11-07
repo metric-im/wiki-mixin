@@ -7,7 +7,7 @@ export default class WikiMixin {
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
-        this.rootPath = path.dirname(fileURLToPath(import.meta.url));
+        this.rootPath = process.env.RELATIVEMODULES?path.dirname(fileURLToPath(import.meta.url)):".";
         this.componentPath = this.rootPath+'/components';
         this.umlOptions = {};
     }
