@@ -1,14 +1,13 @@
 import express from 'express';
 import plantuml from 'node-plantuml';
-import path from "path";
-import {fileURLToPath} from "url";
-export default class WikiMixin {
+import Componentry from "@metric-im/componentry";
+
+export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
+        super(connector,import.meta.url);
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
-        this.rootPath = process.env.RELATIVEMODULES?path.dirname(fileURLToPath(import.meta.url)):".";
-        this.componentPath = this.rootPath+'/components';
         this.umlOptions = {};
     }
     routes() {

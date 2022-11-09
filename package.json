@@ -9,6 +9,7 @@
   "author": "Michael Sprague",
   "license": "MIT",
   "dependencies": {
+    "@metric-im/componentry": "^1.1.1",
     "express": "^4.17.1",
     "marked": "^4.1.1",
     "moment": "^2.29.1",
