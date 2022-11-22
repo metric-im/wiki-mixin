@@ -6,6 +6,9 @@
     font-size: 0.8em;
     border-right:1px dotted var(--text-quiet);
 }
+.menu.hidden {
+    display:none;
+}
 
 #doclet-render {
     margin-left:var(--spacerhalf);

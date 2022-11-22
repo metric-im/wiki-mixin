@@ -166,8 +166,11 @@ class WikiMenu {
         label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
         let children = this.page.index.filter(r=>(r._pid===doc._id.d));
         if (children && children.length > 0) {
+            this.docletMenu.classList.remove('hidden');
             let tray = this.page.div('tray',me);
             for (let d of children||[]) this.draw(tray,d);
+        } else {
+            this.docletMenu.classList.add('hidden');
         }
         return me;
     }

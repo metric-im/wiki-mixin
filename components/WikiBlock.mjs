@@ -9,13 +9,12 @@ export default class WikiBlock extends Component {
     async render(element) {
         await super.render(element);
         this.element.classList.add('Wiki');
-        this.element.innerHTML=`
-	    <div class="content ${ this.props.readonly ? 'read-only' : '' }">
-                <div class="form-element-title">${this.props.title}</div>
-                <div class="doclet-render rendering"></div>
-                <textarea class="doclet-editor editing" wrap="soft"></textarea>
-            </div>
-            <div class="control ${this.props.readonly?'read-only':''}"></div>`;
+        let html = `<div class="content ${ this.props.readonly ? 'read-only' : '' }">`;
+        if (this.props.title) html += `<div class="form-element-title">${this.props.title}</div>`;
+        html += `<div class="doclet-render rendering"></div>`;
+        html += `<textarea class="doclet-editor editing" wrap="soft"></textarea>`;
+        html += `</div><div class="control ${this.props.readonly?'read-only':''}"></div>`;
+        this.element.innerHTML = html;
         this.addControls();
         this.docHtml = this.element.querySelector('.doclet-render');
         this.docEdit = this.element.querySelector('.doclet-editor');
