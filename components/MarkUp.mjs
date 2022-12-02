@@ -8,6 +8,8 @@ export default class MarkUp {
     constructor() {
         this.wikiWord = new WikiWord('/#Wiki');
         this.marked = marked;
+        // set to '/uml' to use local server
+        this.umlServer = 'https://metric.im/uml';
     }
     async render(body,options={}) {
         body = await this.replaceExtensionBlocks(body,options);
@@ -35,7 +37,7 @@ export default class MarkUp {
         function replace(match,lang,args,text) {
             args = args?args.slice(1,-1).split(','):[];
             if (lang === 'plantuml') {
-                let target = "/uml?txt="+encodeURIComponent(text);
+                let target = `${this.umlServer}?txt=${encodeURIComponent(text)}`;
                 return `<img src="${target}" alt="UML Diagram"></img>`
             } else if (lang === 'frame') {
                 let frames = text.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric)?\/.*?$)/gm, (match,title,style, path) => {
