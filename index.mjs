@@ -1,6 +1,8 @@
 import express from 'express';
 import plantuml from 'node-plantuml';
 import Componentry from "@metric-im/componentry";
+import fs from "fs";
+import path from "path";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -9,6 +11,15 @@ export default class WikiMixin extends Componentry.Module {
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
         this.umlOptions = {};
+        this.doclets = [];
+    }
+    static async mint(connector) {
+        let instance = new WikiMixin(connector);
+        if (fs.existsSync('./doclets')) {
+            let doclets = fs.readdirSync("./doclets");
+            for (let doclet of doclets) instance.doclets[doclet.split('.')[0]] = "./doclets/"+doclet;
+        }
+        return instance;
     }
     routes() {
         const router = express.Router();
@@ -28,9 +39,21 @@ export default class WikiMixin extends Componentry.Module {
         router.all("/wiki/:docId?",async(req,res)=>{
             try {
                 let method = req.method.toLowerCase();
-                let result = await this[method](req.account,req.params.docId,req.query,req.body);
-                if (!result && method !== 'put') res.status(401).send();
-                else res.json(result);
+                if (this.doclets[req.params.docId]) {
+                    if (method !== 'get') res.status(403).send();
+                    else {
+                        let md = fs.readFileSync(this.doclets[req.params.docId]).toString();
+                        res.json({
+                            _id:req.params.docId,
+                            title:req.params.docId,
+                            body:md
+                        })
+                    }
+                } else {
+                    let result = await this[method](req.account,req.params.docId,req.query,req.body);
+                    if (!result && method !== 'put') res.status(401).send();
+                    else res.json(result);
+                }
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
                 res.status(500).send(`Error: ${e.message}`);
