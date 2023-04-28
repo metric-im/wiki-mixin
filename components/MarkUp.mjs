@@ -40,7 +40,7 @@ export default class MarkUp {
                 let target = `${this.umlServer}?txt=${encodeURIComponent(text)}`;
                 return `<img src="${target}" alt="UML Diagram"></img>`
             } else if (lang === 'frame') {
-                let frames = text.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric)?\/.*?$)/gm, (match,title,style, path) => {
+                let frames = text.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric|render)?\/.*?$)/gm, (match,title,style, path) => {
                     return `<div class='frame-container ${title?'titled':''}' ${style?'style="'+style+'"':''}>`
                       + `<div class='frame-title'>${title}</div>`
                       + `<iframe src="${path.replace(/"/g,'%22')}"></iframe></div>`
