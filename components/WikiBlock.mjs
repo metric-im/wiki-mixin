@@ -13,11 +13,12 @@ export default class WikiBlock extends Component {
         if (this.props.title) html += `<div class="form-element-title">${this.props.title}</div>`;
         html += `<div class="doclet-render rendering"></div>`;
         html += `<textarea class="doclet-editor editing" wrap="soft"></textarea>`;
+        html += '</div>';
+        html += `<div class="control"></div>`;
+        this.element.innerHTML = html;
         if (!this.props.readOnly) {
-            html += `</div><div class="control"></div>`;
             this.addControls();
         }
-        this.element.innerHTML = html;
         this.docHtml = this.element.querySelector('.doclet-render');
         this.docEdit = this.element.querySelector('.doclet-editor');
         this.docHtml.innerHTML = await this.markUp.render(this.props.data[this.props.name]||"");
