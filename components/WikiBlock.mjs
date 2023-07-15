@@ -12,7 +12,7 @@ export default class WikiBlock extends Component {
         let html = `<div class="content">`;
         if (this.props.title) html += `<div class="form-element-title">${this.props.title}</div>`;
         html += `<div class="doclet-render rendering"></div>`;
-        html += `<textarea class="doclet-editor editing" wrap="soft"></textarea>`;
+        html += `<textarea class="doclet-editor editing ${this.props.title?'titled':''}" wrap="soft"></textarea>`;
         html += '</div>';
         html += `<div class="control"></div>`;
         this.element.innerHTML = html;

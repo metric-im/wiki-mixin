@@ -9,7 +9,6 @@
 .content {
     position:absolute;
     flex:1 0;
-    overflow-y:auto;
     left:0;
     top:0;
     right:40px;
@@ -29,6 +28,10 @@
     border:0;
     padding:6px;
     resize: none;
+    overflow-y:auto;
+}
+.content .doclet-editor.titled {
+    height:calc(100% - 28px);
 }
 .content .doclet-render {
     display:none;
