@@ -24,21 +24,29 @@ export default class WikiPage extends Component {
         this.originalBody = this.doclet.body;
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
+            <div id="mobile-doclet-menu"></div>
+            <span id="menu-toggle" class="icon icon-menu"/></span>
             <div id="doclet-container">
                 <div id="render-container" class="rendering">
                     <div id="doclet-menu" class="menu"></div>
                     <div id="doclet-render" class="Wiki">
                         <div id="doclet-content" class="doclet-render"></div>
                     </div>                
+                    <div id="mobile-doclet-menu"></div>
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
                     <textarea id="doclet-editor" wrap="soft"></textarea>
                 </div>
             </div>`;
+        let mobileTray = this.element.querySelector('#mobile-doclet-menu');
+        let body = document.querySelector(".Main");
+        body.appendChild(mobileTray);
+        mobileTray.id = "mobile-doclet-menu";
         this.container = this.element.querySelector('#doclet-container');
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
+        this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly) {
             await this.addControls();
             await this.addProperties();
@@ -47,6 +55,20 @@ export default class WikiPage extends Component {
         this.editing(false);
         options._pid = this.doclet._id.d;
         this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
+        let renderContainer = this.element.querySelector('#render-container');
+        let menu = this.element.querySelector('#doclet-menu');
+        let menuToggle = this.element.querySelector('#menu-toggle');
+        let mobile = matchMedia('(max-width:600px)');
+        menuPosition();
+        mobile.addEventListener('change',menuPosition);
+        menuToggle.addEventListener('click',(event)=>{
+            mobileTray.classList.toggle('active');
+            this.controls.classList.toggle('hidden');
+        })
+        function menuPosition() {
+            if (mobile.matches) mobileTray.appendChild(menu);
+            else renderContainer.prepend(menu);
+        }
     }
     async load() {
         try {
@@ -88,7 +110,6 @@ export default class WikiPage extends Component {
         await modDate.render(this.docletProperties);
     }
     async addControls() {
-        this.controls = this.element.querySelector("#doclet-controls");
         for (let b of [
             {icon:'edit',action:this.edit.bind(this),mode:'rendering'},
             {icon:'save',action:this.save.bind(this),mode:'rendering',class:"important-if-modified"},
@@ -125,8 +146,13 @@ export default class WikiPage extends Component {
     }
     async doneEditing() {
         if (this.editor.value !== this.originalBody) {
+            window.addEventListener("beforeunload", (event)=>{
+                event.preventDefault();
+                event.returnValue = true;
+            });
             this.element.classList.add('modified')
         } else {
+            window.removeEventListener("beforeunload",(event)=>{});
             this.element.classList.remove('modified')
         }
         this.doclet.body = this.editor.value;
@@ -170,9 +196,11 @@ class WikiMenu {
         labelText.innerHTML = doc.title || doc._id.d;
         toggle.addEventListener('click',(e)=>{me.classList.toggle('open')});
         labelText.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
+        if (doc._id.d === this.page.props.context.path.slice(1)) {
+            this.openTree(me);
+        }
         let children = this.page.index.filter(r=>(r._pid===doc._id.d));
         if (children && children.length > 0) {
-            this.docletMenu.classList.add('active');
             let tray = this.page.div('tray',me);
             for (let d of children||[]) this.draw(tray,d);
         } else {
@@ -180,6 +208,13 @@ class WikiMenu {
             toggle.style.cursor = 'default';
         }
         return me;
+    }
+    openTree(me) {
+        console.log(me.querySelector('.label-text').innerHTML);
+        me.classList.add('open');
+        let parent = me.parentElement.closest('.menuitem');
+        if (parent) this.openTree(parent);
+        else return;
     }
     findRoot(doc) {
         if (!doc) return null;

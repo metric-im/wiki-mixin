@@ -23,6 +23,10 @@ export default class WikiWord {
         for (let line of lines) {
             if (line.match(/^(```|~~~)/)) skipping = !skipping;
             if (!skipping) {
+                // To force a link not in camel case surround the word in brackets
+                line = line.replace(/\[([A-Za-z0-9]+)\]/g,(match,word)=>{
+                    return `[${word}](${this.path}/${word}${_pid?`?_pid=${_pid}`:""})`;
+                });
                 line = line.replace(/(^|[^a-zA-Z0-9:_\-=.["'}{\\/])([!A-Z][A-Z0-9]*[a-z][a-z0-9_]*[A-Z][A-Za-z0-9_]*)/g,(match,pre,word)=>{
                     if (word.charAt(0) === '!') return pre+(word.slice(1));
                     else if (pre === "W:") return `[${word}](wikipedia.org?s=${word})`;
