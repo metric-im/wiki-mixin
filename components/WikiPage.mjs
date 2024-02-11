@@ -164,13 +164,20 @@ class WikiMenu {
     draw(elem,doc) {
         let me = this.page.div('menuitem',elem);
         let label = this.page.div('label',me);
-        label.innerHTML = doc.title || doc._id.d;
-        label.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
+        let toggle = this.page.div('toggle',label);
+        let labelText = this.page.div('label-text',label);
+        toggle.innerHTML = '>';
+        labelText.innerHTML = doc.title || doc._id.d;
+        toggle.addEventListener('click',(e)=>{me.classList.toggle('open')});
+        labelText.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
         let children = this.page.index.filter(r=>(r._pid===doc._id.d));
         if (children && children.length > 0) {
             this.docletMenu.classList.add('active');
             let tray = this.page.div('tray',me);
             for (let d of children||[]) this.draw(tray,d);
+        } else {
+            toggle.style.opacity = 0;
+            toggle.style.cursor = 'default';
         }
         return me;
     }

@@ -18,18 +18,46 @@
     position:relative;
 }
 .menuitem {
+    display:block;
+    flex-direction: column;
     margin-left:3px;
     margin-top:var(--spacerthird);
     color:var(--text-quiet);
 }
-.menuitem .label:hover {
-    color:var(--text-color);
+.menuitem .label {
+    display: flex;
+    flex-direction: row;
+}
+
+.menuitem>.label>.toggle {
+    flex:0 0;
+    margin-right:var(--spacerhalf);
+    transition: all 200ms;
+    font-weight: bold;
+}
+.menuitem>.label>.toggle:hover {
+    cursor:pointer;
+    text-decoration: unset;
+}
+.menuitem.open>.label>.toggle {
+    transform: rotate(90deg);
+}
+.menuitem .label .label-text {
+    flex:1 1;
+}
+.menuitem>.label>.label-text:hover {
     cursor:pointer;
     text-decoration: underline;
 }
-.menuitem .tray {
+.menuitem>.tray {
     margin-top:var(--spacerthird);
     margin-bottom:var(--spacer);
+    margin-left:var(--spacerhalf);
+    transition:height 200ms;
+    display:none;
+}
+.menuitem.open>.tray {
+    display:block;
 }
 .menuitem.root-menu {
     position:fixed;
