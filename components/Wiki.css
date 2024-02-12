@@ -71,7 +71,7 @@
     flex-direction:column;
 }
 #render-container #doclet-menu {
-    flex:120px 0;
+    flex:150px 0;
     padding:var(--spacer);
 }
 #doclet-container #doclet-properties {
@@ -153,25 +153,25 @@ th {
     font-size: 0.8em;
     border-right:1px dotted var(--text-quiet);
 }
-^ #mobile-doclet-menu {
+#mobile-doclet-menu {
     position:absolute;
     top:0;
     bottom:0;
     left:0;
     right:10%;
     background-color: black;
-    font-size:1em;
-    display:none;
-    padding-top:12px;
     font-size:1.3em;
+    display:none;
+    padding-top:24px;
+    z-index:100;
 }
-^ #mobile-doclet-menu.active {
+#mobile-doclet-menu.active {
     display:block;
 }
-^ #mobile-doclet-menu #doclet-menu {
+#mobile-doclet-menu #doclet-menu {
     width:100%;
 }
-^ #mobile-doclet-menu .menuitem.root-menu {
+#mobile-doclet-menu .menuitem.root-menu {
     width:100%;
 }
 #menu-toggle {
@@ -235,7 +235,7 @@ th {
 }
 .menuitem.root-menu {
     position:fixed;
-    width:120px;
+    width:150px;
     margin-top:0;
     margin-left:-3px;
 }

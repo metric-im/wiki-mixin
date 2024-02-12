@@ -39,10 +39,7 @@ export default class WikiPage extends Component {
                     <textarea id="doclet-editor" wrap="soft"></textarea>
                 </div>
             </div>`;
-        let mobileTray = this.element.querySelector('#mobile-doclet-menu');
         let body = document.querySelector(".Main");
-        body.appendChild(mobileTray);
-        mobileTray.id = "mobile-doclet-menu";
         this.container = this.element.querySelector('#doclet-container');
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
@@ -57,6 +54,7 @@ export default class WikiPage extends Component {
         this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
         let renderContainer = this.element.querySelector('#render-container');
         let menu = this.element.querySelector('#doclet-menu');
+        let mobileTray = this.element.querySelector('#mobile-doclet-menu');
         let menuToggle = this.element.querySelector('#menu-toggle');
         let mobile = matchMedia('(max-width:600px)');
         menuPosition();
