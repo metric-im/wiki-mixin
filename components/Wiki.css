@@ -71,8 +71,13 @@
     flex-direction:column;
 }
 #render-container #doclet-menu {
+}
+#doclet-menu #menu-content {
     flex:150px 0;
     padding:var(--spacer);
+    overflow-y:auto;
+    overflow-x:hidden;
+
 }
 #doclet-container #doclet-properties {
     display:flex;
@@ -96,7 +101,7 @@
     position:absolute;
     right: 16px;
     display: inline-flex;
-    margin-top:-22px;
+    margin-top:-28px;
     height:30px;
     align-self:flex-end;
     z-index:100;
@@ -164,6 +169,8 @@ th {
     display:none;
     padding-top:24px;
     z-index:100;
+    overflow-y:auto;
+    overflow-x:hidden;
 }
 #mobile-doclet-menu.active {
     display:block;
@@ -180,7 +187,7 @@ th {
     z-index:100;
     position:absolute;
     left: var(--spacer);
-    margin-top:-36px;
+    margin-top:-42px;
     z-index:100;
     display:none;
     cursor:pointer;
@@ -234,6 +241,8 @@ th {
     display:block;
 }
 .menuitem.root-menu {
+}
+.menu-container {
     position:fixed;
     width:150px;
     margin-top:0;

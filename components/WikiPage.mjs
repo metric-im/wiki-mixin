@@ -24,15 +24,18 @@ export default class WikiPage extends Component {
         this.originalBody = this.doclet.body;
         this.element.innerHTML = `
             <div id="doclet-controls"></div>
-            <div id="mobile-doclet-menu"></div>
+            <div id="mobile-doclet-menu">
+                <div id="mobile-menu-content"></div>
+            </div>
             <span id="menu-toggle" class="icon icon-menu"/></span>
             <div id="doclet-container">
                 <div id="render-container" class="rendering">
-                    <div id="doclet-menu" class="menu"></div>
+                    <div id="doclet-menu" class="menu">
+                        <div id="menu-content"></div>
+                    </div>
                     <div id="doclet-render" class="Wiki">
                         <div id="doclet-content" class="doclet-render"></div>
-                    </div>                
-                    <div id="mobile-doclet-menu"></div>
+                    </div>
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
@@ -128,6 +131,7 @@ export default class WikiPage extends Component {
         let result = await API.put('/wiki/'+this.doclet._id.d,this.doclet);
         if (result) {
             window.toast.success('saved');
+            window.removeEventListener("beforeunload",(event)=>{});
             await this.load();
             await this.render();
         } else {
@@ -176,7 +180,7 @@ class WikiMenu {
         this.page = wikiPage;
     }
     async render(elem,doc) {
-        this.docletMenu = this.page.element.querySelector('#doclet-menu');
+        this.docletMenu = this.page.element.querySelector('#menu-content');
         let docId = doc._created?doc._id.d:doc._pid;
         let indexDoc = this.page.index.find(r=>r._id.d===docId);
         this.root = this.findRoot(indexDoc);
@@ -190,7 +194,7 @@ class WikiMenu {
         let label = this.page.div('label',me);
         let toggle = this.page.div('toggle',label);
         let labelText = this.page.div('label-text',label);
-        toggle.innerHTML = '>';
+        toggle.innerHTML = "<span class='icon icon-chevron-with-circle-right'></span> ";
         labelText.innerHTML = doc.title || doc._id.d;
         toggle.addEventListener('click',(e)=>{me.classList.toggle('open')});
         labelText.addEventListener('click',(e)=>{document.location.href = '#Wiki/'+doc._id.d});
@@ -217,7 +221,7 @@ class WikiMenu {
     findRoot(doc) {
         if (!doc) return null;
         if (doc.rootmenu) return doc;
-        if (!doc._pid) return null;
+        if (!doc._pid || doc._id.d === doc._pid) return null;
         else return this.findRoot(this.page.index.find(r=>r._id.d===doc._pid));
     }
 }
