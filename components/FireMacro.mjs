@@ -18,7 +18,7 @@ export default class FireMacro {
         this.options = options || {};
         this.dataStack = [];
         this.counters = {};
-        this.moment = moment; // defined in the browser or imported dynamically during parse()
+        try {this.moment = moment}catch(e){} // defined in the browser or imported dynamically during parse()
         if (!this.options.noHelpers) this.dataStack.unshift(this.helpers);
     }
 
