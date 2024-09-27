@@ -2,6 +2,7 @@ import express from 'express';
 import plantuml from 'node-plantuml';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
+import FireMacro from "./components/FireMacro.mjs";
 import path from "path";
 
 export default class WikiMixin extends Componentry.Module {
@@ -12,6 +13,9 @@ export default class WikiMixin extends Componentry.Module {
         this.rootDoc = "Home";
         this.umlOptions = {};
         this.doclets = [];
+    }
+    static get FireMacro() {
+        return FireMacro;
     }
     static async mint(connector) {
         let instance = new WikiMixin(connector);
