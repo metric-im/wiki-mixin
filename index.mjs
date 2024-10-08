@@ -67,6 +67,7 @@ export default class WikiMixin extends Componentry.Module {
             try {
                 res.set('Content-Type', 'image/png');
                 let code = decodeURIComponent(req.query.txt)
+                code = code.replace(/\\n/g,"\n");
                 code = code.replace(/^@startuml/i,"");
                 code = code.replace(/@enduml$/i,"");
                 let header = `skinparam backgroundColor transparent\n`
