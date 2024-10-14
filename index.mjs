@@ -30,7 +30,8 @@ export default class WikiMixin extends Componentry.Module {
         router.use('/wiki',(req,res,next)=>{
             if (req.account && req.account.id) next();
             else res.status(401).send();
-        })
+        });
+        router.use('/wiki/src',express.static(`${this.rootPath}/src_modules`));
         router.get("/wiki/index",async(req,res)=>{
             try {
                 let result = await this.getIndex(req.account);
@@ -63,20 +64,38 @@ export default class WikiMixin extends Componentry.Module {
                 res.status(500).send(`Error: ${e.message}`);
             }
         });
-        router.get('/uml/',async(req,res)=>{
+        router.get('/uml',async(req,res)=>{
             try {
-                res.set('Content-Type', 'image/png');
-                let code = decodeURIComponent(req.query.txt)
-                code = code.replace(/\\n/g,"\n");
-                code = code.replace(/^@startuml/i,"");
-                code = code.replace(/@enduml$/i,"");
                 let header = `skinparam backgroundColor transparent\n`
-                let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
-                gen.out.pipe(res);
+                if (req.query.hasOwnProperty('txt')) { // raw uml code, requires newlines be honored
+                    res.set('Content-Type', 'image/png');
+                    let code = decodeURIComponent(req.query.txt)
+                    // code = code.replace(/\\n/g,"\n"); // use %0A instead
+                    code = code.replace(/^@startuml/i,"");
+                    code = code.replace(/@enduml$/i,"");
+                    let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
+                    gen.out.pipe(res);
+                } else if (req.query.hasOwnProperty('code')) {
+                    let code = Buffer(req.query.code).toString();
+                    code = decodeURIComponent(code)
+                    let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
+                    gen.out.pipe(res);
+                } else if (req.query.hasOwnProperty('edit')) {
+                    res.cookie('editor_source',req.query.edit);
+                    res.sendFile(`${this.rootPath}/editor.html`)
+                } else {
+                    res.status(403).send({error:"malformed request."})
+                }
             } catch(e) {
                 res.status(e.status||500).json({status:"error",message:e.message});
             }
         });
+        /**
+         * Render the editor
+         */
+        router.get('/umleditor',(req,res)=>{
+            res.sendFile(`${this.rootPath}/editor.html`)
+        })
         return router;
     }
     async getIndex(account) {
