@@ -37,7 +37,7 @@ export default class MarkUp {
         function replace(match,lang,args,text) {
             args = args?args.slice(1,-1).split(','):[];
             if (lang === 'plantuml') {
-                let target = `${this.umlServer}?txt=${encodeURIComponent(text)}`;
+                let target = `${this.umlServer}/draw/${encodeURIComponent(text)}`;
                 return `<img src="${target}" alt="UML Diagram"></img>`
             } else if (lang === 'frame') {
                 let frames = text.replace(/^(.*?)(?:\[(.*?)\])?(\/(?:pull|analysis|metric|render)?\/.*?$)/gm, (match,title,style, path) => {

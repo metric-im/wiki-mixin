@@ -1,9 +1,7 @@
 import express from 'express';
-import plantuml from 'node-plantuml';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
 import FireMacro from "./components/FireMacro.mjs";
-import path from "path";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -11,7 +9,6 @@ export default class WikiMixin extends Componentry.Module {
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
-        this.umlOptions = {};
         this.doclets = [];
     }
     static get FireMacro() {
@@ -30,7 +27,8 @@ export default class WikiMixin extends Componentry.Module {
         router.use('/wiki',(req,res,next)=>{
             if (req.account && req.account.id) next();
             else res.status(401).send();
-        })
+        });
+        router.use('/wiki/src',express.static(`${this.rootPath}/src_modules`));
         router.get("/wiki/index",async(req,res)=>{
             try {
                 let result = await this.getIndex(req.account);
@@ -61,20 +59,6 @@ export default class WikiMixin extends Componentry.Module {
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
                 res.status(500).send(`Error: ${e.message}`);
-            }
-        });
-        router.get('/uml/',async(req,res)=>{
-            try {
-                res.set('Content-Type', 'image/png');
-                let code = decodeURIComponent(req.query.txt)
-                code = code.replace(/\\n/g,"\n");
-                code = code.replace(/^@startuml/i,"");
-                code = code.replace(/@enduml$/i,"");
-                let header = `skinparam backgroundColor transparent\n`
-                let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
-                gen.out.pipe(res);
-            } catch(e) {
-                res.status(e.status||500).json({status:"error",message:e.message});
             }
         });
         return router;

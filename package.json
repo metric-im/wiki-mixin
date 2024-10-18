@@ -1,6 +1,6 @@
 {
   "name": "@metric-im/wiki-mixin",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "simple markdown wiki for integration with app-harness",
   "main": "index.mjs",
   "scripts": {
@@ -13,7 +13,6 @@
     "express": "^4.17.1",
     "marked": "^4.1.1",
     "moment": "^2.29.1",
-    "node-plantuml": "^0.9.0",
     "remark-gfm": "^3.0.1"
   },
   "devDependencies": {
