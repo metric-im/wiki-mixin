@@ -1,9 +1,7 @@
 import express from 'express';
-import plantuml from 'node-plantuml';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
 import FireMacro from "./components/FireMacro.mjs";
-import path from "path";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -11,7 +9,6 @@ export default class WikiMixin extends Componentry.Module {
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
-        this.umlOptions = {};
         this.doclets = [];
     }
     static get FireMacro() {
@@ -64,38 +61,6 @@ export default class WikiMixin extends Componentry.Module {
                 res.status(500).send(`Error: ${e.message}`);
             }
         });
-        router.get('/uml',async(req,res)=>{
-            try {
-                let header = `skinparam backgroundColor transparent\n`
-                if (req.query.hasOwnProperty('txt')) { // raw uml code, requires newlines be honored
-                    res.set('Content-Type', 'image/png');
-                    let code = decodeURIComponent(req.query.txt)
-                    // code = code.replace(/\\n/g,"\n"); // use %0A instead
-                    code = code.replace(/^@startuml/i,"");
-                    code = code.replace(/@enduml$/i,"");
-                    let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
-                    gen.out.pipe(res);
-                } else if (req.query.hasOwnProperty('code')) {
-                    let code = Buffer(req.query.code).toString();
-                    code = decodeURIComponent(code)
-                    let gen = plantuml.generate(`@startuml\n${header}\n${code}\n@enduml`,{format: 'png'});
-                    gen.out.pipe(res);
-                } else if (req.query.hasOwnProperty('edit')) {
-                    res.cookie('editor_source',req.query.edit);
-                    res.sendFile(`${this.rootPath}/editor.html`)
-                } else {
-                    res.status(403).send({error:"malformed request."})
-                }
-            } catch(e) {
-                res.status(e.status||500).json({status:"error",message:e.message});
-            }
-        });
-        /**
-         * Render the editor
-         */
-        router.get('/umleditor',(req,res)=>{
-            res.sendFile(`${this.rootPath}/editor.html`)
-        })
         return router;
     }
     async getIndex(account) {
