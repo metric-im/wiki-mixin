@@ -212,7 +212,6 @@ class WikiMenu {
         return me;
     }
     openTree(me) {
-        console.log(me.querySelector('.label-text').innerHTML);
         me.classList.add('open');
         let parent = me.parentElement.closest('.menuitem');
         if (parent) this.openTree(parent);

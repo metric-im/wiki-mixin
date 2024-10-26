@@ -59,7 +59,7 @@ export default class MarkUp {
                     let data = await API.get(block.args[0]);
                     if (data) {
                         if (!Array.isArray(data)) data = [data];
-                        let fm = new FireMacro(block.text);
+                        let fm = new FireMacro(block.text,{clear:true});
                         for (let record of data) {
                             result += await fm.parse({_account:this.prop},record);
                         }

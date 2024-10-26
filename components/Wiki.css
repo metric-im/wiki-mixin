@@ -11,6 +11,9 @@
 #doclet-controls BUTTON {
     display:none;
 }
+#doclet-render {
+    overflow:auto;
+}
 .doclet-render .frame-set {
     display:flex;
     flex-wrap: wrap;
@@ -52,8 +55,8 @@
     position:absolute;
     display:none;
     height:calc(100% - var(--spacer2));
-    width:calc(100% - var(--spacer2));
-    padding:var(--spacer);
+    width:calc(100% - var(--spacer));
+    padding:var(--spacer) 0 var(--spacer) var(--spacer);
 }
 #doclet-container #editor-container {
     position:absolute;
@@ -71,13 +74,12 @@
     flex-direction:column;
 }
 #render-container #doclet-menu {
+    overflow-y:auto;
+    min-width:140px;
 }
 #doclet-menu #menu-content {
     flex:150px 0;
-    padding:var(--spacer);
-    overflow-y:auto;
-    overflow-x:hidden;
-
+    padding:var(--spacer) var(--spacer) var(--spacer) 0;
 }
 #doclet-container #doclet-properties {
     display:flex;
@@ -240,8 +242,10 @@ th {
 .menuitem.open>.tray {
     display:block;
 }
-.menuitem.root-menu {
+.menuitem.root-menu>.tray {
+    display:block;
 }
+
 .menu-container {
     position:fixed;
     width:150px;
