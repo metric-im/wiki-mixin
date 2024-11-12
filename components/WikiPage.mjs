@@ -74,7 +74,11 @@ export default class WikiPage extends Component {
     async load() {
         try {
             this.index = await API.get('/wiki/index');
-            let qs = this.options._pid?"?_pid="+this.options._pid:"";
+            let qs = Object.keys(this.options||{}).reduce((r,key)=>{
+                r += `&${key}=${this.options[key]}`
+                return r;
+            },'');
+            if (qs.length > 0) qs = '?'+qs.slice(1);
             this.doclet = await API.get('/wiki/'+this.docId+qs);
         } catch(e) {
             this.element.innerHTML='<div id="unavailable">Page unavailable. Return to <a href="/#Wiki/WikiHome">Wiki Home</a>.</div>'
@@ -132,8 +136,7 @@ export default class WikiPage extends Component {
         if (result) {
             window.toast.success('saved');
             window.removeEventListener("beforeunload",(event)=>{});
-            await this.load();
-            await this.render();
+            await this.render(null,this.options); // null because this.element already attached to parent
         } else {
             window.toast.error('there was an error saving the doclet. See console.');
             console.log(result.lastErrorObject);

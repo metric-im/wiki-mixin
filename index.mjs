@@ -1,7 +1,7 @@
 import express from 'express';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
-import FireMacro from "./components/FireMacro.mjs";
+import FireMacro from "@metric-im/firemacro";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -11,6 +11,7 @@ export default class WikiMixin extends Componentry.Module {
         this.rootDoc = "Home";
         this.doclets = [];
     }
+    // Now that FireMacro is independent, this is deprecated
     static get FireMacro() {
         return FireMacro;
     }
