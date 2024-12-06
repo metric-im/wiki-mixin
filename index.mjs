@@ -55,10 +55,13 @@ export default class WikiMixin extends Componentry.Module {
                 if (this.doclets[req.params.docId]) {
                     if (method !== 'get') res.status(403).send();
                     else {
+                        let _pid = req.query._pid || '';
                         let md = fs.readFileSync(this.doclets[req.params.docId]).toString();
                         res.json({
                             _id:req.params.docId,
                             title:req.params.docId,
+                            _pid:_pid,
+                            _locked:true,
                             body:md
                         })
                     }

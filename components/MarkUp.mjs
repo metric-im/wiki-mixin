@@ -26,9 +26,11 @@ export default class MarkUp {
      */
     async replaceExtensionBlocks(body,options) {
         // first replace macro elements from query string
-        if (Object.keys(options).length>0) {
+        let args = Object.assign({},options);
+        delete args._pid;
+        if (Object.keys(args).length>0) {
             let fm = new FireMacro(body);
-            body = await fm.parse(options);
+            body = await fm.parse(args);
         }
         // search for extension blocks
         let asyncBlocks = [];

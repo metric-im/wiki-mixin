@@ -47,7 +47,7 @@ export default class WikiPage extends Component {
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
         this.controls = this.element.querySelector("#doclet-controls");
-        if (!this.props.readOnly) {
+        if (!this.props.readOnly && !this.doclet._locked) {
             await this.addControls();
             await this.addProperties();
         }
