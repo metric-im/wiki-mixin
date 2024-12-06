@@ -9,7 +9,6 @@ export default class WikiMixin extends Componentry.Module {
         this.connector = connector;
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
-        this.doclets = [];
     }
     // Now that FireMacro is independent, this is deprecated
     static get FireMacro() {
@@ -17,11 +16,22 @@ export default class WikiMixin extends Componentry.Module {
     }
     static async mint(connector) {
         let instance = new WikiMixin(connector);
-        if (fs.existsSync('./doclets')) {
-            let doclets = fs.readdirSync("./doclets");
-            for (let doclet of doclets) instance.doclets[doclet.split('.')[0]] = "./doclets/"+doclet;
-        }
+        instance.gatherDoclets();
         return instance;
+    }
+    gatherDoclets() {
+        if (!this.doclets) {
+            this.doclets = [];
+            // reload in case componentry is not yet fully loaded
+            setTimeout(this.gatherDoclets.bind(this),5000);
+        }
+        Object.values(this.connector.componentry.modules).forEach(module=>{
+            let path = module.rootPath+'/doclets';
+            if (fs.existsSync(path)) {
+                let doclets = fs.readdirSync(path);
+                for (let doclet of doclets) this.doclets[doclet.split('.')[0]] = path+'/'+doclet;
+            }
+        })
     }
     routes() {
         const router = express.Router();
