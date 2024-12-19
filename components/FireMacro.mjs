@@ -47,7 +47,7 @@ export default class FireMacro {
     }
 
     async parse() {
-        if (!this.moment) this.moment = await import('moment');
+        if (!this.moment) this.moment = (await import('moment')).default;
         for (let a of arguments) if (a) this.dataStack.unshift(a);
         this.result = await this.traverseAsync(this.model);
         this.result = await Macro.wash(this.result);
