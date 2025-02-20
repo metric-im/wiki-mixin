@@ -2,6 +2,7 @@ import express from 'express';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
 import FireMacro from "@metric-im/firemacro";
+import Xipper from "xipper";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -164,5 +165,10 @@ export default class WikiMixin extends Componentry.Module {
     }
     get umlBackgroundColor() {
         return this.umlOptions.backgroundColor;
+    }
+    get library() {
+        return {
+            'xipper':'/../xipper/'
+        };
     }
 }

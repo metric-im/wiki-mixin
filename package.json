@@ -11,10 +11,12 @@
   "dependencies": {
     "@metric-im/componentry": "^1.2.6",
     "@metric-im/firemacro": "^2.0.0",
+    "bcrypt": "^5.1.1",
     "express": "^4.17.1",
     "marked": "^4.1.1",
     "moment": "^2.29.1",
-    "remark-gfm": "^3.0.1"
+    "remark-gfm": "^3.0.1",
+    "xipper": "^1.0.1"
   },
   "devDependencies": {
     "eslint": "^8.4.1",

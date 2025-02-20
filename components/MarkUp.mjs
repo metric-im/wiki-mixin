@@ -1,4 +1,5 @@
 import {marked} from "/lib/marked";
+import Xipper from "/lib/xipper/Xipper.mjs";
 import WikiWord from "./WikiWord.mjs";
 import API from './API.mjs';
 import FireMacro from "./FireMacro.mjs";
@@ -10,6 +11,7 @@ export default class MarkUp {
         this.marked = marked;
         // set to '/uml' to use local server
         this.umlServer = 'https://metric.im/uml';
+        this.xipper = new Xipper();
     }
     async render(body,options={}) {
         body = await this.replaceExtensionBlocks(body,options);
@@ -25,7 +27,12 @@ export default class MarkUp {
      * @returns {Promise<void>}
      */
     async replaceExtensionBlocks(body,options) {
-        // first replace macro elements from query string
+        // process scrambles (xipper)
+        let key = await this.xipper.makeKey("the wind of the west and more int east");
+        body = body.replace(/@@(.*)@@/mg,(block,content)=>{
+            return this.xipper.cloak(key,content);
+        })
+        // replace macro elements from query string
         let args = Object.assign({},options);
         delete args._pid;
         if (Object.keys(args).length>0) {
@@ -34,8 +41,8 @@ export default class MarkUp {
         }
         // search for extension blocks
         let asyncBlocks = [];
-        body = body.replace(/^~{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n~{3,4}/gsm,replace.bind(this));
-        body = body.replace(/^`{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n`{3,4}/gsm,replace.bind(this));
+        body = body.replace(/^~{3,4}(macro|plantuml|frame|encode)(\(.*?\))?\n(.*?)\n~{3,4}/gsm,replace.bind(this));
+        body = body.replace(/^`{3,4}(macro|plantuml|frame|encode)(\(.*?\))?\n(.*?)\n`{3,4}/gsm,replace.bind(this));
         function replace(match,lang,args,text) {
             args = args?args.slice(1,-1).split(','):[];
             if (lang === 'plantuml') {
@@ -50,8 +57,17 @@ export default class MarkUp {
                 return `<div class='frame-set'>\n${frames}\n</div>`
             } else if (lang === 'macro') {
                 let key = IdForge.randomId(12);
-                asyncBlocks.push({key:key,lang:lang,args:args,text:text});
+                asyncBlocks.push({key: key, lang: lang, args: args, text: text});
                 return key;
+            } else if (lang === 'encode') {
+                let keySource = args.shift();
+                if (keySource?.toLowerCase() === 'prompt') {
+                    let promptText = args.shift();
+                    let key = window.prompt(promptText);
+                    return key;
+                } else {
+                    return text;
+                }
             } else return text;
         }
         for (let block of asyncBlocks) {
