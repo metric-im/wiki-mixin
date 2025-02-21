@@ -1,6 +1,6 @@
 import Component from './Component.mjs';
 import API from "./API.mjs";
-import {marked} from "/lib/marked";
+import XipperMonitor from '/lib/xipper/monitor/index.mjs';
 import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
@@ -39,13 +39,18 @@ export default class WikiPage extends Component {
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
-                    <textarea id="doclet-editor" wrap="soft"></textarea>
+                    <div id="editor-tray">
+                        <textarea id="doclet-editor" wrap="soft"></textarea>
+                    </div>
                 </div>
             </div>`;
         let body = document.querySelector(".Main");
         this.container = this.element.querySelector('#doclet-container');
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
+        this.editorTray = this.element.querySelector('#editor-tray');
+        this.xipperMonitor = new XipperMonitor(this.editor);
+
         this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly && !this.doclet._locked) {
             await this.addControls();

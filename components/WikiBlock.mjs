@@ -1,5 +1,6 @@
 import Component from './Component.mjs';
 import MarkUp from './MarkUp.mjs';
+import XipperMonitor from './XipperMonitor.mjs';
 
 export default class WikiBlock extends Component {
     constructor(props) {
@@ -23,6 +24,7 @@ export default class WikiBlock extends Component {
         this.docEdit = this.element.querySelector('.doclet-editor');
         this.docHtml.innerHTML = await this.markUp.render(this.props.data[this.props.name]||"");
         this.docEdit.value = this.props.data[this.props.name]||"";
+        this.xipperMonitor = new XipperMonitor(this.docEdit);
         this.editing(false);
     }
     addControls() {
