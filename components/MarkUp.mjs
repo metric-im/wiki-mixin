@@ -28,9 +28,16 @@ export default class MarkUp {
      */
     async replaceExtensionBlocks(body,options) {
         // process scrambles (xipper)
-        let key = await this.xipper.makeKey("the wind of the west and more int east");
+        let key = await this.xipper.makeKey("the wind in the west");
         body = body.replace(/@@(.*)@@/mg,(block,content)=>{
-            return this.xipper.cloak(key,content);
+            let body = this.xipper.cloak(key,content);
+            window._dexip = async(element) =>{
+                let phrase = window.prompt('Enter passphrase')
+                let key = await this.xipper.makeKey(phrase)
+                let node = document.createTextNode(this.xipper.decloak(key,element.innerText));
+                element.replaceWith(node);
+            }
+            return `<span class="xipper" onclick="_dexip(this)">${body}</span>`
         })
         // replace macro elements from query string
         let args = Object.assign({},options);
