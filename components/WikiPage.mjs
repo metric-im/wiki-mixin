@@ -3,6 +3,7 @@ import API from "./API.mjs";
 import XipperMonitor from '/lib/xipper/monitor/index.mjs';
 import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
+import Xipper from "/lib/xipper/Xipper.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
 import {InputSelect} from "./InputSelect.mjs";
 import {InputToggle} from "./InputToggle.mjs";
@@ -14,6 +15,7 @@ export default class WikiPage extends Component {
         this.doclet = {};
         this.path = this.props.path || "/";
         this.markUp = new MarkUp();
+        this.xipper = new Xipper();
         this.menu = new WikiMenu(this);
     }
     async render(element,options={}) {
@@ -49,7 +51,8 @@ export default class WikiPage extends Component {
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
         this.editorTray = this.element.querySelector('#editor-tray');
-        this.xipperMonitor = new XipperMonitor(this.editor);
+        this.xipperMonitorContent = new XipperMonitor(this.html);
+        this.xipperMonitorEditor = new XipperMonitor(this.editor);
 
         this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly && !this.doclet._locked) {
@@ -59,7 +62,15 @@ export default class WikiPage extends Component {
         await this.menu.render(this.element,this.doclet);
         this.editing(false);
         options._pid = this.doclet._id.d;
-        this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
+        let content = this.doclet.body;
+        if (this.xipper.testBlock(content)) {
+            try {
+                content = await this.xipper.decloakBlock(content,this.xipper.store.get(this.doclet._id.d));
+            } catch (e) {
+                this.xipperMonitorContent
+            }
+        }
+        this.html.innerHTML = await this.markUp.render(content,options);
         let renderContainer = this.element.querySelector('#render-container');
         let menu = this.element.querySelector('#doclet-menu');
         let mobileTray = this.element.querySelector('#mobile-doclet-menu');

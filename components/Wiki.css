@@ -117,6 +117,9 @@
 #doclet-controls.hidden {
     display:none;
 }
+#doclet-content {
+    width:100%;
+}
 button {
     display:none;
     padding:0;
