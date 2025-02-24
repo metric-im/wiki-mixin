@@ -51,8 +51,9 @@ export default class WikiPage extends Component {
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
         this.editorTray = this.element.querySelector('#editor-tray');
-        this.xipperMonitorContent = new XipperMonitor(this.html);
-        this.xipperMonitorEditor = new XipperMonitor(this.editor);
+
+        // this.editing() attaches the monitor to the displayed state
+        this.xipperMonitor = new XipperMonitor(this.doclet._id.d,{hide:true});
 
         this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly && !this.doclet._locked) {
@@ -64,11 +65,8 @@ export default class WikiPage extends Component {
         options._pid = this.doclet._id.d;
         let content = this.doclet.body;
         if (this.xipper.testBlock(content)) {
-            try {
-                content = await this.xipper.decloakBlock(content,this.xipper.store.get(this.doclet._id.d));
-            } catch (e) {
-                this.xipperMonitorContent
-            }
+            this.xipperMonitor.reveal();
+            content = await this.xipperMonitor.render(content);
         }
         this.html.innerHTML = await this.markUp.render(content,options);
         let renderContainer = this.element.querySelector('#render-container');
@@ -161,9 +159,18 @@ export default class WikiPage extends Component {
     async remove() {
         await window.toast.prompt(`Delete ${this.doclet._id.a}/${this.doclet._id.d}?`);
     }
-    edit() {
-        this.editor.value = this.doclet.body;
-        this.editing(true);
+    async edit() {
+        try {
+            if (this.xipper.testBlock(this.doclet.body)) {
+                this.editor.value = await this.xipper.decloakBlock(this.xipperMonitor.activePhrase,this.doclet.body);
+            } else {
+                this.editor.value = this.doclet.body;
+            }
+            this.editing(true);
+        } catch(e) {
+            this.xipperMonitor.flash();
+            this.xipperMonitor.activate(true);
+        }
     }
     async doneEditing() {
         if (this.editor.value !== this.originalBody) {
@@ -177,8 +184,21 @@ export default class WikiPage extends Component {
             this.element.classList.remove('modified')
         }
         this.doclet.body = this.editor.value;
-        this.html.innerHTML = await this.markUp.render(this.doclet.body,this.options);
-        this.editing(false);
+        try {
+            let content = this.editor.value;
+            if (this.xipper.testBlock(this.editor.value)) {
+                this.doclet.body = await this.xipper.cloakBlock(this.xipperMonitor.activePhrase,content);
+                content = await this.xipperMonitor.render(this.doclet.body);
+            } else {
+                this.doclet.body = content;
+            }
+            this.html.innerHTML = await this.markUp.render(content,this.options);
+            this.editing(false);
+        } catch(e) {
+            console.log(e);
+            this.xipperMonitor.flash();
+            this.xipperMonitor.activate(true);
+        }
     }
     cancelEditing() {
         this.editing(false);
@@ -187,9 +207,11 @@ export default class WikiPage extends Component {
         if (yes) {
             this.container.classList.add('editing');
             this.controls.classList.add('editing');
+            this.xipperMonitor.attach(this.editor);
         } else {
             this.container.classList.remove('editing');
             this.controls.classList.remove('editing');
+            this.xipperMonitor.attach(this.html);
         }
     }
 }

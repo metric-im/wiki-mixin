@@ -1,5 +1,4 @@
 import {marked} from "/lib/marked";
-import Xipper from "/lib/xipper/Xipper.mjs";
 import WikiWord from "./WikiWord.mjs";
 import API from './API.mjs';
 import FireMacro from "./FireMacro.mjs";
@@ -11,7 +10,6 @@ export default class MarkUp {
         this.marked = marked;
         // set to '/uml' to use local server
         this.umlServer = 'https://metric.im/uml';
-        this.xipper = new Xipper();
     }
     async render(body,options={}) {
         body = await this.replaceExtensionBlocks(body,options);
@@ -27,18 +25,6 @@ export default class MarkUp {
      * @returns {Promise<void>}
      */
     async replaceExtensionBlocks(body,options) {
-        // process scrambles (xipper)
-        let key = await this.xipper.makeKey("the wind in the west");
-        body = body.replace(/@@(.*)@@/mg,(block,content)=>{
-            let body = this.xipper.cloak(key,content);
-            window._dexip = async(element) =>{
-                let phrase = window.prompt('Enter passphrase')
-                let key = await this.xipper.makeKey(phrase)
-                let node = document.createTextNode(this.xipper.decloak(key,element.innerText));
-                element.replaceWith(node);
-            }
-            return `<span class="xipper" onclick="_dexip(this)">${body}</span>`
-        })
         // replace macro elements from query string
         let args = Object.assign({},options);
         delete args._pid;
