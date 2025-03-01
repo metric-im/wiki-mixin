@@ -103,7 +103,7 @@
 #doclet-container #doclet-editor {
     height:100%;
     width:100%;
-    padding:0;
+    padding:1px;
 }
 #doclet-controls {
     position:absolute;

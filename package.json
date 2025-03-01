@@ -16,7 +16,7 @@
     "marked": "^4.1.1",
     "moment": "^2.29.1",
     "remark-gfm": "^3.0.1",
-    "xipper": "^1.1.0"
+    "xipper": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^8.4.1",

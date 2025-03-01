@@ -52,7 +52,12 @@ export default class WikiPage extends Component {
         this.editorTray = this.element.querySelector('#editor-tray');
 
         // this.editing() attaches the monitor to the displayed state
-        this.xipperMonitor = new XipperMonitor(this.doclet._id.d,{hide:true});
+        this.xipperMonitor = new XipperMonitor(this.doclet._id.d,{hide:true,onupdate:async ()=>{
+            if (!this.container.classList.contains('editing')) {
+                let content = await this.xipperMonitor.render(this.doclet.body);
+                this.html.innerHTML = await this.markUp.render(content,this.options);
+            }
+        }});
 
         this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly && !this.doclet._locked) {
