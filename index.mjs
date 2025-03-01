@@ -167,7 +167,8 @@ export default class WikiMixin extends Componentry.Module {
     }
     get library() {
         return {
-            'xipper':'/../../../xipper/xipper.bundle.js'
+            'xipper':'/xipper/xipper.bundle.js'
+            // 'xipper':'/../../../xipper/xipper.bundle.js'
         };
     }
 }
