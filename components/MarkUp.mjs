@@ -52,7 +52,7 @@ export default class MarkUp {
                 let key = IdForge.randomId(12);
                 asyncBlocks.push({key: key, lang: lang, args: args, text: text});
                 return key;
-            }
+            } else return text;
         }
         for (let block of asyncBlocks) {
             if (block.lang === 'macro') {
