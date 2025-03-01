@@ -34,8 +34,8 @@ export default class MarkUp {
         }
         // search for extension blocks
         let asyncBlocks = [];
-        body = body.replace(/^~{3,4}(macro|plantuml|frame|encode)(\(.*?\))?\n(.*?)\n~{3,4}/gsm,replace.bind(this));
-        body = body.replace(/^`{3,4}(macro|plantuml|frame|encode)(\(.*?\))?\n(.*?)\n`{3,4}/gsm,replace.bind(this));
+        body = body.replace(/^~{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n~{3,4}/gsm,replace.bind(this));
+        body = body.replace(/^`{3,4}(macro|plantuml|frame)(\(.*?\))?\n(.*?)\n`{3,4}/gsm,replace.bind(this));
         function replace(match,lang,args,text) {
             args = args?args.slice(1,-1).split(','):[];
             if (lang === 'plantuml') {
@@ -52,16 +52,7 @@ export default class MarkUp {
                 let key = IdForge.randomId(12);
                 asyncBlocks.push({key: key, lang: lang, args: args, text: text});
                 return key;
-            } else if (lang === 'encode') {
-                let keySource = args.shift();
-                if (keySource?.toLowerCase() === 'prompt') {
-                    let promptText = args.shift();
-                    let key = window.prompt(promptText);
-                    return key;
-                } else {
-                    return text;
-                }
-            } else return text;
+            }
         }
         for (let block of asyncBlocks) {
             if (block.lang === 'macro') {
