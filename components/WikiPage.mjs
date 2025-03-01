@@ -1,6 +1,6 @@
 import Component from './Component.mjs';
 import API from "./API.mjs";
-import {marked} from "/lib/marked";
+import {Xipper,XipperMonitor} from '/lib/xipper';
 import {InputID,InputText,InputNumber} from "./InputText.mjs";
 import MarkUp from "./MarkUp.mjs";
 import {InputModifiedDate} from "./InputDate.mjs";
@@ -14,6 +14,7 @@ export default class WikiPage extends Component {
         this.doclet = {};
         this.path = this.props.path || "/";
         this.markUp = new MarkUp();
+        this.xipper = new Xipper();
         this.menu = new WikiMenu(this);
     }
     async render(element,options={}) {
@@ -39,13 +40,20 @@ export default class WikiPage extends Component {
                 </div>
                 <div id="editor-container" class="editing">
                     <div id="doclet-properties"></div>
-                    <textarea id="doclet-editor" wrap="soft"></textarea>
+                    <div id="editor-tray">
+                        <textarea id="doclet-editor" wrap="soft"></textarea>
+                    </div>
                 </div>
             </div>`;
         let body = document.querySelector(".Main");
         this.container = this.element.querySelector('#doclet-container');
         this.html = this.element.querySelector('#doclet-content');
         this.editor = this.element.querySelector('#doclet-editor');
+        this.editorTray = this.element.querySelector('#editor-tray');
+
+        // this.editing() attaches the monitor to the displayed state
+        this.xipperMonitor = new XipperMonitor(this.doclet._id.d,{hide:true});
+
         this.controls = this.element.querySelector("#doclet-controls");
         if (!this.props.readOnly && !this.doclet._locked) {
             await this.addControls();
@@ -54,7 +62,12 @@ export default class WikiPage extends Component {
         await this.menu.render(this.element,this.doclet);
         this.editing(false);
         options._pid = this.doclet._id.d;
-        this.html.innerHTML = await this.markUp.render(this.doclet.body,options);
+        let content = this.doclet.body;
+        if (this.xipper.testBlock(content)) {
+            this.xipperMonitor.reveal();
+            content = await this.xipperMonitor.render(content);
+        }
+        this.html.innerHTML = await this.markUp.render(content,options);
         let renderContainer = this.element.querySelector('#render-container');
         let menu = this.element.querySelector('#doclet-menu');
         let mobileTray = this.element.querySelector('#mobile-doclet-menu');
@@ -145,9 +158,18 @@ export default class WikiPage extends Component {
     async remove() {
         await window.toast.prompt(`Delete ${this.doclet._id.a}/${this.doclet._id.d}?`);
     }
-    edit() {
-        this.editor.value = this.doclet.body;
-        this.editing(true);
+    async edit() {
+        try {
+            if (this.xipper.testBlock(this.doclet.body)) {
+                this.editor.value = await this.xipper.decloakBlock(this.xipperMonitor.activePhrase,this.doclet.body);
+            } else {
+                this.editor.value = this.doclet.body;
+            }
+            this.editing(true);
+        } catch(e) {
+            this.xipperMonitor.flash();
+            this.xipperMonitor.activate(true);
+        }
     }
     async doneEditing() {
         if (this.editor.value !== this.originalBody) {
@@ -161,8 +183,21 @@ export default class WikiPage extends Component {
             this.element.classList.remove('modified')
         }
         this.doclet.body = this.editor.value;
-        this.html.innerHTML = await this.markUp.render(this.doclet.body,this.options);
-        this.editing(false);
+        try {
+            let content = this.editor.value;
+            if (this.xipper.testBlock(this.editor.value)) {
+                this.doclet.body = await this.xipper.cloakBlock(this.xipperMonitor.activePhrase,content);
+                content = await this.xipperMonitor.render(this.doclet.body);
+            } else {
+                this.doclet.body = content;
+            }
+            this.html.innerHTML = await this.markUp.render(content,this.options);
+            this.editing(false);
+        } catch(e) {
+            console.log(e);
+            this.xipperMonitor.flash();
+            this.xipperMonitor.activate(true);
+        }
     }
     cancelEditing() {
         this.editing(false);
@@ -171,9 +206,11 @@ export default class WikiPage extends Component {
         if (yes) {
             this.container.classList.add('editing');
             this.controls.classList.add('editing');
+            this.xipperMonitor.attach(this.editor);
         } else {
             this.container.classList.remove('editing');
             this.controls.classList.remove('editing');
+            this.xipperMonitor.attach(this.html);
         }
     }
 }

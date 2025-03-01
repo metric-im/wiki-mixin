@@ -165,4 +165,9 @@ export default class WikiMixin extends Componentry.Module {
     get umlBackgroundColor() {
         return this.umlOptions.backgroundColor;
     }
+    get library() {
+        return {
+            'xipper':'/xipper/xipper.bundle.js'
+        };
+    }
 }

@@ -96,8 +96,14 @@
     flex:1 0;
     padding:var(--spacer);
 }
-#doclet-container #doclet-editor {
+#doclet-container #editor-tray {
+    position:relative;
     flex:1 0;
+}
+#doclet-container #doclet-editor {
+    height:100%;
+    width:100%;
+    padding:0;
 }
 #doclet-controls {
     position:absolute;
@@ -110,6 +116,9 @@
 }
 #doclet-controls.hidden {
     display:none;
+}
+#doclet-content {
+    width:100%;
 }
 button {
     display:none;

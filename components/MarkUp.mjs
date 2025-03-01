@@ -25,7 +25,7 @@ export default class MarkUp {
      * @returns {Promise<void>}
      */
     async replaceExtensionBlocks(body,options) {
-        // first replace macro elements from query string
+        // replace macro elements from query string
         let args = Object.assign({},options);
         delete args._pid;
         if (Object.keys(args).length>0) {
@@ -50,7 +50,7 @@ export default class MarkUp {
                 return `<div class='frame-set'>\n${frames}\n</div>`
             } else if (lang === 'macro') {
                 let key = IdForge.randomId(12);
-                asyncBlocks.push({key:key,lang:lang,args:args,text:text});
+                asyncBlocks.push({key: key, lang: lang, args: args, text: text});
                 return key;
             } else return text;
         }
