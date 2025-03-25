@@ -10,10 +10,6 @@ export default class WikiMixin extends Componentry.Module {
         this.collection = this.connector.db.collection('wiki');
         this.rootDoc = "Home";
     }
-    // Now that FireMacro is independent, this is deprecated
-    static get FireMacro() {
-        return FireMacro;
-    }
     static async mint(connector) {
         let instance = new WikiMixin(connector);
         instance.gatherDoclets();

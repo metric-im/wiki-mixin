@@ -21,7 +21,13 @@ export default class WikiWord {
         let newLines = [];
         let skipping = false;
         for (let line of lines) {
-            if (line.match(/^[`~]{3,4}([^`~]+)/)) skipping = !skipping;
+            if (line.match(/^[`~]{3,4}/)) {
+                skipping = !skipping;
+                if (!skipping) {  // skip a close block line
+                    newLines.push(line);
+                    continue;
+                }
+            }
             if (!skipping) {
                 // To force a link not in camel case surround the word in brackets
                 line = line.replace(/\[([A-Za-z0-9]+)\]/g,(match,word)=>{
