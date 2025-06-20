@@ -148,7 +148,7 @@ export default class WikiMixin extends Componentry.Module {
         delete body.visibility;
         try {
             let result = await this.collection.findOneAndUpdate({_id:body._id},{$set:body},{upsert:true,returnNewDocument:true});
-            if (result.ok && deletes.length > 0) {
+            if (result?.ok && deletes.length > 0) {
                 await this.collection.deleteMany({_id:{$in:deletes}});
             }
             return body;
