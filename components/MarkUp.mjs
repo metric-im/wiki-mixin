@@ -1,7 +1,7 @@
 import {marked} from "/lib/marked";
 import WikiWord from "./WikiWord.mjs";
 import API from './API.mjs';
-import FireMacro from "./FireMacro.mjs";
+import FireMacro from "/lib/firemacro";
 import IdForge from "./IdForge.mjs";
 
 export default class MarkUp {

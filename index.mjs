@@ -1,7 +1,7 @@
 import express from 'express';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
-import FireMacro from "@metric-im/firemacro";
+import moment from "moment";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -49,22 +49,23 @@ export default class WikiMixin extends Componentry.Module {
             try {
                 let method = req.method.toLowerCase();
                 if (this.doclets[req.params.docId]) {
-                    if (method !== 'get') res.status(403).send();
+                    if (method !== 'get') return res.status(403).send();
                     else {
-                        let _pid = req.query._pid || '';
                         let md = fs.readFileSync(this.doclets[req.params.docId]).toString();
                         res.json({
                             _id:req.params.docId,
                             title:req.params.docId,
-                            _pid:_pid,
                             _locked:true,
                             body:md
-                        })
+                        });
                     }
                 } else {
-                    let result = await this[method](req.account,req.params.docId,req.query,req.body);
-                    if (!result && method !== 'put') res.status(401).send();
-                    else res.json(result);
+                    let options = Object.assign({_pid:req.cookies._pid||""},req.query)
+                    let result = await this[method](req.account,req.params.docId,options,req.body);
+                    if (!result && method !== 'put') return res.status(401).send();
+                    let expires = moment().add( 1 ,'hour').toDate();
+                    res.cookie("_pid",req.params.docId,{expires:expires,sameSite:"Strict"});
+                    res.json(result);
                 }
             } catch(e) {
                 console.error(`Error invoking ${req.method} on data`,e);
