@@ -28,12 +28,12 @@ export default class WikiBlock extends Component {
     addControls() {
         let element = this.element.querySelector(".control");
         for (let b of [
-            {icon:'edit',action:this.edit.bind(this),mode:'rendering'},
-            {icon:'check',action:this.doneEditing.bind(this),mode:'editing'},
-            {icon:'cross',action:this.cancelEditing.bind(this),mode:'editing'}
+            {icon:'edit',action:this.edit.bind(this),mode:'rendering',title:'edit'},
+            {icon:'check',action:this.doneEditing.bind(this),mode:'editing',title:'done'},
+            {icon:'cross',action:this.cancelEditing.bind(this),mode:'editing',title:'cancel'}
         ]) {
             let button = document.createElement('button');
-            button.innerHTML=`<span class="icon icon-${b.icon}"/>`;
+            button.innerHTML=`<span title='${b.title}' class="icon icon-${b.icon}"/>`;
             button.classList.add(b.mode);
             button.addEventListener('click',b.action);
             element.appendChild(button);
