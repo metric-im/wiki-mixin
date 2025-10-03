@@ -225,7 +225,7 @@ class WikiMenu {
         this.page = wikiPage;
     }
     async render(elem,doc) {
-        const settings = await import('./WikiSettings.mjs')
+        const settings = (await import('./WikiSettings.mjs')) || {};
         this.docletMenu = this.page.element.querySelector('#menu-content');
         let docId = doc._created?doc._id.d:doc._pid;
         let indexDoc = this.page.index.find(r=>r._id.d===docId);
@@ -233,7 +233,15 @@ class WikiMenu {
         if (!this.root) return;
         this.docletMenu.innerHTML = "";
         let rootMenu = this.draw.call(this,this.docletMenu,this.root);
-        rootMenu.classList.add('root-menu');
+        for (let item of settings.menuAppend||[]) {
+            let me = this.page.div('menuitem',this.docletMenu);
+            let label = this.page.div('label',me);
+            let toggle = this.page.div('toggle',label);
+            let labelText = this.page.div('label-text',label);
+            if (item.icon) toggle.innerHTML = `<span class='icon icon-${item.icon}'></span> `;
+            labelText.innerHTML = item.label;
+            labelText.addEventListener('click',(e)=>{document.location.href = item.target});
+        }
     }
     draw(elem,doc) {
         let me = this.page.div('menuitem',elem);

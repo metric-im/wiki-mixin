@@ -227,6 +227,9 @@ th {
     transition: all 200ms;
     font-weight: bold;
 }
+.menuitem .icon {
+    padding:0;
+}
 .menuitem>.label>.toggle:hover {
     cursor:pointer;
     text-decoration: unset;
@@ -251,10 +254,6 @@ th {
 .menuitem.open>.tray {
     display:block;
 }
-.menuitem.root-menu>.tray {
-    display:block;
-}
-
 .menu-container {
     position:fixed;
     width:150px;
