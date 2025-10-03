@@ -225,6 +225,7 @@ class WikiMenu {
         this.page = wikiPage;
     }
     async render(elem,doc) {
+        const settings = await import('./WikiSettings.mjs')
         this.docletMenu = this.page.element.querySelector('#menu-content');
         let docId = doc._created?doc._id.d:doc._pid;
         let indexDoc = this.page.index.find(r=>r._id.d===docId);
