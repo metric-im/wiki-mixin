@@ -225,7 +225,7 @@ class WikiMenu {
         this.page = wikiPage;
     }
     async render(elem,doc) {
-        const settings = (await import('./WikiSettings.mjs')) || {};
+        const settings = await API.get('/wikisettings');
         this.docletMenu = this.page.element.querySelector('#menu-content');
         let docId = doc._created?doc._id.d:doc._pid;
         let indexDoc = this.page.index.find(r=>r._id.d===docId);
@@ -233,7 +233,7 @@ class WikiMenu {
         if (!this.root) return;
         this.docletMenu.innerHTML = "";
         let rootMenu = this.draw.call(this,this.docletMenu,this.root);
-        for (let item of settings.menuAppend||[]) {
+        for (let item of settings?.display?.appendMenu||[]) {
             let me = this.page.div('menuitem',this.docletMenu);
             let label = this.page.div('label',me);
             let toggle = this.page.div('toggle',label);

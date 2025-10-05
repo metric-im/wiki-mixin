@@ -1,7 +1,9 @@
 import express from 'express';
 import Componentry from "@metric-im/componentry";
 import fs from "fs";
+import {resolve} from "path";
 import moment from "moment";
+import jsonic from "jsonic";
 
 export default class WikiMixin extends Componentry.Module {
     constructor(connector) {
@@ -72,6 +74,15 @@ export default class WikiMixin extends Componentry.Module {
                 res.status(500).send(`Error: ${e.message}`);
             }
         });
+        router.get("/wikisettings/:docId?",async(req,res)=>{
+            try {
+                const result = await this.getSettings(req.account,req.params.docId||'WikiSettings');
+                res.json(result);
+            } catch(e) {
+                console.error(`Error fetching wikisettings`,e);
+                res.status(500).send(`Error: ${e.message}`);
+            }
+        })
         return router;
     }
     async getIndex(account) {
@@ -167,5 +178,79 @@ export default class WikiMixin extends Componentry.Module {
           'xipper':'/xipper/xipper.bundle.js',
           'firemacro':'/firemacro/index.mjs'
         };
+    }
+    async getSettings(account,docId) {
+        let settings = {};
+        const doclet = await this.get(account,docId);
+        if (doclet) {
+            const lines = doclet.body.split('\n');
+            let currentObj = settings;
+            let objStack = [settings];
+            let nameStack = [];
+
+            for (let line of lines) {
+                line = line.trim();
+
+                // Parse headings
+                const headingMatch = line.match(/^(#+)\s+(.+)$/);
+                if (headingMatch) {
+                    const level = headingMatch[1].length;
+                    const name = this.normalizePropertyName(headingMatch[2]);
+
+                    // Adjust stack to appropriate level
+                    while (objStack.length > level) {
+                        objStack.pop();
+                        nameStack.pop();
+                    }
+
+                    // Create new object
+                    const newObj = {};
+                    objStack[objStack.length - 1][name] = newObj;
+                    objStack.push(newObj);
+                    nameStack.push(name);
+                    currentObj = newObj;
+                    continue;
+                }
+
+                // Parse bullet points (attributes)
+                const bulletMatch = line.match(/^\*\s+(.+?)\s*=\s*(.*)$/);
+                if (bulletMatch) {
+                    const name = this.normalizePropertyName(bulletMatch[1]);
+                    let value = bulletMatch[2].replace(/;$/,'').trim();
+
+                    // Parse value type
+                    if (value === '') {
+                        value = '';
+                    } else if (value === 'true') {
+                        value = true;
+                    } else if (value === 'false') {
+                        value = false;
+                    } else if (!isNaN(value) && value !== '') {
+                        value = Number(value);
+                    } else {
+                        try {
+                            value = jsonic(value);
+                        } catch(e) {
+                            // If jsonic fails, keep as string
+                        }
+                    }
+
+                    currentObj[name] = value;
+                }
+            }
+        }
+        // The top headline is dropped. It is the settings page name
+        return Object.entries(settings)[0][1]
+    }
+
+    normalizePropertyName(name) {
+        // Split on spaces and non-alphanumeric characters
+        const words = name.split(/[\s_-]+/).filter(w => w.length > 0);
+
+        // Convert to camelCase
+        return words.map((word, index) => {
+            if (index === 0) return word.charAt(0).toLowerCase() + word.slice(1);
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }).join('');
     }
 }
