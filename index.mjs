@@ -120,6 +120,9 @@ export default class WikiMixin extends Componentry.Module {
     }
     async put(account,docId,options={},body={}) {
         if (!docId) throw new Error('Id is required');
+        // check write access
+        const writeAccess = await this.connector.acl.test.write({user: account.userId}, {account: account.id});
+        if (!writeAccess) throw new Error('unauthorized');
         // initialize id
         if (!body._id) body._id = {a:body.visibility||account.id,d:docId};
         // get existing doc(s) across all visibility zones

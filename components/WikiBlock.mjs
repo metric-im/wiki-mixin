@@ -16,15 +16,18 @@ export default class WikiBlock extends Component {
         html += '</div>';
         html += `<div class="control"></div>`;
         this.element.innerHTML = html;
+/*ACL>1*/
         if (!this.props.readOnly) {
             this.addControls();
         }
+/*ENDACL*/
         this.docHtml = this.element.querySelector('.doclet-render');
         this.docEdit = this.element.querySelector('.doclet-editor');
         this.docHtml.innerHTML = await this.markUp.render(this.props.data[this.props.name]||"");
         this.docEdit.value = this.props.data[this.props.name]||"";
         this.editing(false);
     }
+    /*ACL>1*/
     addControls() {
         let element = this.element.querySelector(".control");
         for (let b of [
@@ -39,6 +42,7 @@ export default class WikiBlock extends Component {
             element.appendChild(button);
         }
     }
+    /*ENDACL*/
     edit() {
         this.docEdit.innerText = this.props.data[this.props.name];
         this.docEdit.focus();
