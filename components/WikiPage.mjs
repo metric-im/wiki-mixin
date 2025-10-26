@@ -134,14 +134,14 @@ export default class WikiPage extends Component {
     }
     async addControls() {
         for (let b of [
-            {icon:'edit',action:this.edit.bind(this),mode:'rendering'},
-            {icon:'save',action:this.save.bind(this),mode:'rendering',class:"important-if-modified"},
-            {icon:'trash',action:this.remove.bind(this),mode:'rendering'},
-            {icon:'check',action:this.doneEditing.bind(this),mode:'editing'},
-            {icon:'cross',action:this.cancelEditing.bind(this),mode:'editing'}
+            {icon:'edit',action:this.edit.bind(this),mode:'rendering',title:'edit'},
+            {icon:'save',action:this.save.bind(this),mode:'rendering',class:"important-if-modified",title:'save'},
+            {icon:'trash',action:this.remove.bind(this),mode:'rendering',title:'delete'},
+            {icon:'check',action:this.doneEditing.bind(this),mode:'editing',title:'done'},
+            {icon:'cross',action:this.cancelEditing.bind(this),mode:'editing',title:'cancel'}
         ]) {
             let button = document.createElement('button');
-            button.innerHTML=`<span class="icon icon-${b.icon}"/>`;
+            button.innerHTML=`<span title='${b.title}' class="icon icon-${b.icon}"/>`;
             button.classList.add(b.mode);
             if (b.class) button.classList.add(b.class);
             button.addEventListener('click',b.action);
@@ -225,6 +225,7 @@ class WikiMenu {
         this.page = wikiPage;
     }
     async render(elem,doc) {
+        const settings = await API.get('/wikisettings');
         this.docletMenu = this.page.element.querySelector('#menu-content');
         let docId = doc._created?doc._id.d:doc._pid;
         let indexDoc = this.page.index.find(r=>r._id.d===docId);
@@ -232,7 +233,15 @@ class WikiMenu {
         if (!this.root) return;
         this.docletMenu.innerHTML = "";
         let rootMenu = this.draw.call(this,this.docletMenu,this.root);
-        rootMenu.classList.add('root-menu');
+        for (let item of settings?.display?.appendMenu||[]) {
+            let me = this.page.div('menuitem',this.docletMenu);
+            let label = this.page.div('label',me);
+            let toggle = this.page.div('toggle',label);
+            let labelText = this.page.div('label-text',label);
+            if (item.icon) toggle.innerHTML = `<span class='icon icon-${item.icon}'></span> `;
+            labelText.innerHTML = item.label;
+            labelText.addEventListener('click',(e)=>{document.location.href = item.target});
+        }
     }
     draw(elem,doc) {
         let me = this.page.div('menuitem',elem);

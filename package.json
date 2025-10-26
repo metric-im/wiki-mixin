@@ -1,6 +1,6 @@
 {
   "name": "@metric-im/wiki-mixin",
-  "version": "1.7.5",
+  "version": "1.8.1",
   "description": "simple markdown wiki for integration with app-harness",
   "main": "index.mjs",
   "scripts": {
@@ -13,10 +13,11 @@
     "@metric-im/firemacro": "^2.0.0",
     "bcrypt": "^5.1.1",
     "express": "^4.17.1",
+    "firemacro": "^1.0.0",
     "marked": "^4.1.1",
     "moment": "^2.29.1",
     "remark-gfm": "^3.0.1",
-    "xipper": "^1.1.2"
+    "xipper": "^1.1.3"
   },
   "devDependencies": {
     "eslint": "^8.4.1",
