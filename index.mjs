@@ -76,7 +76,8 @@ export default class WikiMixin extends Componentry.Module {
         });
         router.get("/wikisettings/:docId?",async(req,res)=>{
             try {
-                const result = await this.getSettings(req.account,req.params.docId||'WikiSettings');
+                // docId is not honored until assured it's not a security hole
+                const result = await this.getSettings(req.account,'WikiSettings');
                 res.json(result);
             } catch(e) {
                 console.error(`Error fetching wikisettings`,e);
