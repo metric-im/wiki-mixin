@@ -121,13 +121,11 @@ export default class WikiMixin extends Componentry.Module {
     }
     async put(account,docId,options={},body={}) {
         if (!docId) throw new Error('Id is required');
-        // initialize id (IMPORTANT: MongoDB _id objects are order-sensitive!)
-        if (!body._id) body._id = {d:docId,a:body.visibility||account.id};
         // check write access
         const writeAccess = await this.connector.acl.test.write({user: account.userId}, {account: account.id});
         if (!writeAccess) throw new Error('unauthorized');
-        // initialize id
-        if (!body._id) body._id = {a:body.visibility||account.id,d:docId};
+        // initialize id (IMPORTANT: MongoDB _id objects are order-sensitive!)
+        if (!body._id) body._id = {d:docId,a:body.visibility||account.id};
         // get existing doc(s) across all visibility zones
         let docList = await this.collection.find({"_id.d":docId}).toArray();
         let docMap = {user:null,account:null,public:null}
