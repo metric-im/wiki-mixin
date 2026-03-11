@@ -180,7 +180,7 @@ export default class WikiMixin extends Componentry.Module {
     get library() {
         return {
           'xipper':'/xipper/xipper.bundle.js',
-          'firemacro':'/firemacro/index.mjs'
+          'firemacro': '/@metric-im/firemacro/index.mjs'
         };
     }
     async getSettings(account,docId) {
